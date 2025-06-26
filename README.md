@@ -1,7 +1,14 @@
-# Tauri + React + Typescript
+# brew 🏴‍☠️
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+A modern, fast and user-friendly Minecraft launcher focused on pirated minecraft.
 
-## Recommended IDE Setup
+## Getting Started
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+1. Download the latest release
+2. Install and run the launcher
+3. Select your Minecraft version
+4. Enjoy playing!
+
+## Legal Notice
+
+This software is for educational purposes only. We encourage supporting official Minecraft by purchasing it from [minecraft.net](https://minecraft.net)

@@ -2,6 +2,7 @@ import { Window } from '@tauri-apps/api/window';
 import { invoke } from '@tauri-apps/api/core';
 import { useState, useEffect } from 'react';
 import appIcon from './assets/beer.svg';
+import SplashScreen from './components/SplashScreen';
 
 // Определение типа настроек для TypeScript
 interface Settings {
@@ -16,17 +17,24 @@ function App() {
   const [activeSettingsTab, setActiveSettingsTab] = useState('appearance');
   const [discordRpcEnabled, setDiscordRpcEnabled] = useState(true);
   const [selectedTheme, setSelectedTheme] = useState('system');
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   
   // Загрузка системной информации и настроек при старте
   useEffect(() => {
     const loadSystemAndSettings = async () => {
       try {
+        // Start with some basic progress to indicate initialization
+        setLoadingProgress(10);
+        
         // Получение системной информации из Rust
         const sysInfo: any = await invoke('get_system_info');
         setSystemInfo({
           os: sysInfo.os,
           version: sysInfo.version
         });
+        
+        setLoadingProgress(40);
         
         // Загрузка настроек из Rust
         try {
@@ -36,6 +44,7 @@ function App() {
             setSelectedTheme(settings.theme);
             setDiscordRpcEnabled(settings.discord_rpc);
           }
+          setLoadingProgress(70);
         } catch (e) {
           console.error('Failed to load settings:', e);
           // Используем значения по умолчанию и создаем файл настроек
@@ -43,9 +52,26 @@ function App() {
             theme: 'system',
             discord_rpc: true
           });
+          setLoadingProgress(70);
         }
+        
+        // Apply theme before showing the main UI
+        applyTheme(selectedTheme);
+        
+        // Finalize loading
+        setLoadingProgress(100);
+        
+        // Delay showing the main UI to complete the splash screen animation
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 500);
       } catch (error) {
         console.error('Failed to get system info or load settings:', error);
+        // Even if there's an error, we still need to show the UI
+        setLoadingProgress(100);
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 500);
       }
     };
     
@@ -70,7 +96,7 @@ function App() {
     });
     
     // Применить тему к документу
-    document.documentElement.setAttribute('data-theme', theme);
+    applyTheme(theme);
   };
   
   // Обработка переключения Discord RPC
@@ -83,34 +109,34 @@ function App() {
     });
   };
   
-  // Apply theme on initial load and when it changes
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', selectedTheme);
+  // Function to apply theme
+  const applyTheme = (theme: string) => {
+    document.documentElement.setAttribute('data-theme', theme);
     
     // Add theme-specific CSS variables
     const root = document.documentElement;
-    if (selectedTheme === 'dark') {
+    if (theme === 'dark') {
       root.style.setProperty('--bg-primary', '#0a0a0a');
       root.style.setProperty('--bg-secondary', '#18181b');
       root.style.setProperty('--bg-card', '#27272a');
       root.style.setProperty('--text-primary', '#ffffff');
       root.style.setProperty('--text-secondary', '#a0a0a0');
       root.style.setProperty('--border-color', '#333333');
-    } else if (selectedTheme === 'light') {
+    } else if (theme === 'light') {
       root.style.setProperty('--bg-primary', '#ffffff');
       root.style.setProperty('--bg-secondary', '#f8f8f8');
       root.style.setProperty('--bg-card', '#f0f0f0');
       root.style.setProperty('--text-primary', '#000000');
       root.style.setProperty('--text-secondary', '#505050');
       root.style.setProperty('--border-color', '#e0e0e0');
-    } else if (selectedTheme === 'oled') {
+    } else if (theme === 'oled') {
       root.style.setProperty('--bg-primary', '#000000');
       root.style.setProperty('--bg-secondary', '#0a0a0a');
       root.style.setProperty('--bg-card', '#111111');
       root.style.setProperty('--text-primary', '#ffffff');
       root.style.setProperty('--text-secondary', '#a0a0a0');
       root.style.setProperty('--border-color', '#222222');
-    } else if (selectedTheme === 'system') {
+    } else if (theme === 'system') {
       // Use system theme if available, fallback to dark
       if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         root.style.setProperty('--bg-primary', '#0a0a0a');
@@ -128,13 +154,16 @@ function App() {
         root.style.setProperty('--border-color', '#e0e0e0');
       }
     }
-    
-    // Listen for system theme changes if system theme is selected
+  };
+  
+  // Listen for system theme changes if system theme is selected
+  useEffect(() => {
     if (selectedTheme === 'system') {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       const handleChange = (e: MediaQueryListEvent) => {
         if (e.matches) {
           // Dark mode
+          const root = document.documentElement;
           root.style.setProperty('--bg-primary', '#0a0a0a');
           root.style.setProperty('--bg-secondary', '#18181b');
           root.style.setProperty('--bg-card', '#27272a');
@@ -143,6 +172,7 @@ function App() {
           root.style.setProperty('--border-color', '#333333');
         } else {
           // Light mode
+          const root = document.documentElement;
           root.style.setProperty('--bg-primary', '#ffffff');
           root.style.setProperty('--bg-secondary', '#f8f8f8');
           root.style.setProperty('--bg-card', '#f0f0f0');
@@ -183,9 +213,17 @@ function App() {
   };
   
   const themeClasses = getThemeClasses();
+  
+  // Show splash screen while loading
+  if (isLoading) {
+    return <SplashScreen 
+      onInitialized={() => setIsLoading(false)}
+      progress={loadingProgress}
+    />;
+  }
 
   return (
-    <div className={`flex h-screen w-screen ${themeClasses.background} overflow-hidden relative`}>
+    <div className={`flex h-screen w-screen ${themeClasses.background} overflow-hidden relative fade-in`}>
       {/* Titlebar - height 55px */}
       <div 
         className={`w-full h-[55px] ${themeClasses.secondaryBackground} fixed top-0 left-0 right-0 flex items-center justify-between border-b ${themeClasses.border} z-10`}
@@ -281,8 +319,13 @@ function App() {
             bottom: '0'
           }}
         >
-          <main className={`w-full h-full ${themeClasses.background} rounded-tl-[24px] p-4 ${themeClasses.text} overflow-auto border-t border-l ${themeClasses.border}`}>
-    </main>
+          <main
+            className={`w-full h-full ${themeClasses.background} rounded-tl-[24px] p-4 ${themeClasses.text} overflow-auto border-t border-l ${themeClasses.border}`}
+            style={{
+              boxShadow: 'inset 0 4px 8px -2px rgba(0,0,0,0.10), inset 4px 0 8px -2px rgba(0,0,0,0.10)'
+            }}
+          >
+          </main>
         </div>
       </div>
       
@@ -410,11 +453,11 @@ function App() {
                       <div className="grid grid-cols-2 gap-4 max-w-md">
                         {/* Dark theme */}
                         <div 
-                          className={`bg-[#141414] rounded-lg p-1 cursor-pointer border ${selectedTheme === 'dark' ? 'border-gray-500' : 'border-[#232323]'}`}
+                          className={`bg-[#141414] rounded-2xl p-1 cursor-pointer border ${selectedTheme === 'dark' ? 'border-gray-500' : 'border-[#232323]'}`}
                           onClick={() => handleThemeChange('dark')}
                         >
                           {/* Improved preview with card UI */}
-                          <div className="bg-[#18181b] p-4 rounded-md mb-4 h-[80px] relative overflow-hidden">
+                          <div className="bg-[#18181b] p-4 rounded-2xl mb-0 h-[100px] relative overflow-hidden">
                             {/* Card UI on dark background */}
                             <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4/5 h-3/5 bg-[#27272a] rounded-md shadow-md flex flex-col justify-center items-center">
                               <div className="h-2 w-1/2 bg-[#3a3a3f] rounded-sm mb-1.5"></div>
@@ -437,11 +480,11 @@ function App() {
                         
                         {/* Light theme */}
                         <div 
-                          className={`bg-[#141414] rounded-lg p-1 cursor-pointer border ${selectedTheme === 'light' ? 'border-gray-500' : 'border-[#232323]'}`}
+                          className={`bg-[#141414] rounded-2xl p-1 cursor-pointer border ${selectedTheme === 'light' ? 'border-gray-500' : 'border-[#232323]'}`}
                           onClick={() => handleThemeChange('light')}
                         >
                           {/* Improved preview with card UI */}
-                          <div className="bg-[#f8f8f8] p-4 rounded-md mb-4 h-[80px] relative overflow-hidden">
+                          <div className="bg-[#f8f8f8] p-4 rounded-2xl mb-0 h-[100px] relative overflow-hidden">
                             {/* Card UI on light background */}
                             <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4/5 h-3/5 bg-white rounded-md shadow-md flex flex-col justify-center items-center">
                               <div className="h-2 w-1/2 bg-[#e0e0e0] rounded-sm mb-1.5"></div>
@@ -472,11 +515,11 @@ function App() {
                         
                         {/* OLED theme */}
                         <div 
-                          className={`bg-[#141414] rounded-lg p-1 cursor-pointer border ${selectedTheme === 'oled' ? 'border-gray-500' : 'border-[#232323]'}`}
+                          className={`bg-[#141414] rounded-2xl p-1 cursor-pointer border ${selectedTheme === 'oled' ? 'border-gray-500' : 'border-[#232323]'}`}
                           onClick={() => handleThemeChange('oled')}
                         >
                           {/* Improved preview with card UI */}
-                          <div className="bg-black p-4 rounded-md mb-4 h-[80px] relative overflow-hidden">
+                          <div className="bg-black p-4 rounded-2xl mb-0 h-[100px] relative overflow-hidden">
                             {/* Card UI on pure black background */}
                             <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4/5 h-3/5 bg-[#111] rounded-md shadow-md flex flex-col justify-center items-center">
                               <div className="h-2 w-1/2 bg-[#222] rounded-sm mb-1.5"></div>
@@ -496,13 +539,13 @@ function App() {
                         
                         {/* Sync with system */}
                         <div 
-                          className={`bg-[#141414] rounded-lg p-1 cursor-pointer border ${selectedTheme === 'system' ? 'border-gray-500' : 'border-[#232323]'}`}
+                          className={`bg-[#141414] rounded-2xl p-1 cursor-pointer border ${selectedTheme === 'system' ? 'border-gray-500' : 'border-[#232323]'}`}
                           onClick={() => handleThemeChange('system')}
                         >
                           {/* Improved preview with card UI */}
-                          <div className="bg-gradient-to-r from-[#18181b] to-[#fafafa] p-4 rounded-md mb-4 h-[80px] relative overflow-hidden">
+                          <div className="bg-gradient-to-r from-[#18181b] to-[#fafafa] p-4 rounded-2xl mb-0 h-[100px] relative overflow-hidden">
                             {/* Half dark, half light card UI */}
-                            <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4/5 h-3/5 bg-gradient-to-r from-[#27272a] to-[#f1f1f1] rounded-md shadow-md flex">
+                            <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4/5 h-3/5 bg-gradient-to-r from-[#27272a] to-[#f1f1f1] rounded-2xl shadow-md flex">
                               <div className="w-1/2 h-full flex items-center justify-center">
                                 <div className="w-4 h-4 rounded-full bg-[#333]"></div>
                               </div>

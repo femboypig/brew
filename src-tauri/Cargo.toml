@@ -1,8 +1,8 @@
 [package]
 name = "brew"
 version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+description = "A modern, fast and user-friendly Minecraft launcher focused on pirated minecraft."
+authors = ["femboyPig"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -24,4 +24,10 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 dirs = "5.0.1"
 os_info = "3.7.0"
+
+# Add profile configuration to fix linking errors
+[profile.dev]
+codegen-units = 16
+lto = false
+opt-level = 0
 
