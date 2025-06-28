@@ -31,3 +31,5 @@ src-tauri/target/
 
 # Testing
 coverage
+.vscode/
+package-lock.json
