@@ -8,6 +8,21 @@ import SplashScreen from './components/SplashScreen';
 interface Settings {
   theme: string;
   discord_rpc: boolean;
+  advanced_rendering: boolean;
+  language: string;
+}
+
+// Определение типа метаданных языка
+interface LanguageMetadata {
+  id: string;
+  version: string;
+  author: string;
+}
+
+// Определение типа для языковых данных
+interface Language {
+  metadata: LanguageMetadata;
+  [key: string]: string | LanguageMetadata;
 }
 
 function App() {
@@ -19,6 +34,14 @@ function App() {
   const [selectedTheme, setSelectedTheme] = useState('system');
   const [isLoading, setIsLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [currentLanguage, setCurrentLanguage] = useState<string>('en_US');
+  const [availableLanguages, setAvailableLanguages] = useState<LanguageMetadata[]>([]);
+  const [translations, setTranslations] = useState<{[key: string]: string}>({});
+  
+  // Функция для перевода текста с использованием загруженных переводов
+  const t = (key: string, defaultValue?: string): string => {
+    return translations[key] || defaultValue || key;
+  };
   
   // Загрузка системной информации и настроек при старте
   useEffect(() => {
@@ -43,6 +66,7 @@ function App() {
           if (settings) {
             setSelectedTheme(settings.theme);
             setDiscordRpcEnabled(settings.discord_rpc);
+            setCurrentLanguage(settings.language);
           }
           setLoadingProgress(70);
         } catch (e) {
@@ -50,7 +74,9 @@ function App() {
           // Используем значения по умолчанию и создаем файл настроек
           updateSettings({
             theme: 'system',
-            discord_rpc: true
+            discord_rpc: true,
+            advanced_rendering: true,
+            language: 'en_US'
           });
           setLoadingProgress(70);
         }
@@ -60,18 +86,10 @@ function App() {
         
         // Finalize loading
         setLoadingProgress(100);
-        
-        // Delay showing the main UI to complete the splash screen animation
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 500);
       } catch (error) {
         console.error('Failed to get system info or load settings:', error);
         // Even if there's an error, we still need to show the UI
         setLoadingProgress(100);
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 500);
       }
     };
     
@@ -92,7 +110,9 @@ function App() {
     setSelectedTheme(theme);
     updateSettings({
       theme,
-      discord_rpc: discordRpcEnabled
+      discord_rpc: discordRpcEnabled,
+      advanced_rendering: true,
+      language: currentLanguage
     });
     
     // Применить тему к документу
@@ -105,7 +125,9 @@ function App() {
     setDiscordRpcEnabled(newValue);
     updateSettings({
       theme: selectedTheme,
-      discord_rpc: newValue
+      discord_rpc: newValue,
+      advanced_rendering: true,
+      language: currentLanguage
     });
   };
   
@@ -219,6 +241,7 @@ function App() {
     return <SplashScreen 
       onInitialized={() => setIsLoading(false)}
       progress={loadingProgress}
+      onLanguageLoaded={(loadedTranslations) => setTranslations(loadedTranslations)}
     />;
   }
 
@@ -231,7 +254,7 @@ function App() {
       >
         {/* Left side with logo - adjusted to avoid overlap */}
         <div className="flex items-center h-full pl-0 z-20 relative top-[-4px]" data-tauri-drag-region>
-          <span className={`${themeClasses.text} font-medium text-2xl tracking-tight ml-16 antialiased`} data-tauri-drag-region>brew</span>
+          <span className={`${themeClasses.text} font-medium text-2xl tracking-tight ml-16 antialiased`} data-tauri-drag-region>{t('app.title', 'brew')}</span>
         </div>
         
         {/* App icon at the intersection */}
@@ -244,7 +267,7 @@ function App() {
           {/* Status indicator with border and rounded corners */}
           <div className={`flex items-center border ${themeClasses.border} rounded-full px-3 py-1 mr-2 ${themeClasses.secondaryBackground}`} data-tauri-drag-region>
             <span className="w-2 h-2 rounded-full bg-gray-400 mr-2" data-tauri-drag-region></span>
-            <span className={`text-sm ${themeClasses.secondaryText} antialiased`} data-tauri-drag-region>No instances running</span>
+            <span className={`text-sm ${themeClasses.secondaryText} antialiased`} data-tauri-drag-region>{t('app.status.no_instances', 'No instances running')}</span>
           </div>
           
           {/* Window controls with subtle hover effects and smoother transitions */}
@@ -354,7 +377,7 @@ function App() {
                   <path
                     d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
                 </svg>
-                <h2 className={`text-xl font-medium ${themeClasses.text}`}>Settings</h2>
+                <h2 className={`text-xl font-medium ${themeClasses.text}`}>{t('settings.title', 'Settings')}</h2>
               </div>
               
               {/* Close button */}
@@ -398,7 +421,7 @@ function App() {
                       <path d="M9 8c-2 3-4 3.5-7 4l8 10c2-1 6-5 6-7"></path>
                       <path d="M14.5 17.5 4.5 15"></path>
                     </svg>
-                    <span className="font-bold">Appearance</span>
+                    <span className="font-bold">{t('settings.tab.appearance', 'Appearance')}</span>
                   </button>
 
                   {/* Privacy button */}
@@ -421,7 +444,7 @@ function App() {
                       strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mr-3">
                       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                     </svg>
-                    <span className="font-bold">Privacy</span>
+                    <span className="font-bold">{t('settings.tab.privacy', 'Privacy')}</span>
                   </button>
                 </div>
                 
@@ -446,8 +469,8 @@ function App() {
                 <div className="p-6 h-full">
                   {activeSettingsTab === 'appearance' && (
                     <div>
-                      <h3 className={`text-xl ${themeClasses.text} font-medium mb-2`}>Color theme</h3>
-                      <p className={`${themeClasses.secondaryText} text-sm mb-5`}>Select your preferred color theme for Modrinth App.</p>
+                      <h3 className={`text-xl ${themeClasses.text} font-medium mb-2`}>{t('settings.appearance.color_theme', 'Color theme')}</h3>
+                      <p className={`${themeClasses.secondaryText} text-sm mb-5`}>{t('settings.appearance.color_theme.description', 'Select your preferred color theme for Modrinth App.')}</p>
                       
                       {/* Theme selector grid - restored original size */}
                       <div className="grid grid-cols-2 gap-4 max-w-md">
@@ -471,7 +494,7 @@ function App() {
                                 <div className="w-2 h-2 rounded-full bg-[#ffcc40]"></div>
                               )}
                             </div>
-                            <span className="text-gray-300 mr-1">Dark</span>
+                            <span className="text-gray-300 mr-1">{t('settings.appearance.theme.dark', 'Dark')}</span>
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
                               <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
                             </svg>
@@ -498,7 +521,7 @@ function App() {
                                 <div className="w-2 h-2 rounded-full bg-[#ffcc40]"></div>
                               )}
                             </div>
-                            <span className="text-gray-300 mr-1">Light</span>
+                            <span className="text-gray-300 mr-1">{t('settings.appearance.theme.light', 'Light')}</span>
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
                               <circle cx="12" cy="12" r="4"></circle>
                               <path d="M12 2v2"></path>
@@ -533,7 +556,7 @@ function App() {
                                 <div className="w-2 h-2 rounded-full bg-[#ffcc40]"></div>
                               )}
                             </div>
-                            <span className="text-gray-300">OLED</span>
+                            <span className="text-gray-300">{t('settings.appearance.theme.oled', 'OLED')}</span>
                           </div>
                         </div>
                         
@@ -561,8 +584,7 @@ function App() {
                                 <div className="w-2 h-2 rounded-full bg-[#ffcc40]"></div>
                               )}
                             </div>
-                            <span className="text-gray-300">Sync with</span>
-                            <span className="text-gray-300 ml-1">system</span>
+                            <span className="text-gray-300">{t('settings.appearance.theme.sync', 'Sync')}</span>
                           </div>
                         </div>
                       </div>
@@ -571,17 +593,17 @@ function App() {
                   
                   {activeSettingsTab === 'privacy' && (
                     <div>
-                      <h3 className={`text-xl ${themeClasses.text} font-medium mb-4`}>Privacy Settings</h3>
+                      <h3 className={`text-xl ${themeClasses.text} font-medium mb-4`}>{t('settings.tab.privacy', 'Privacy Settings')}</h3>
                       
                       {/* Discord RPC setting with toggle */}
                       <div className={`mt-6 flex items-center justify-between ${themeClasses.cardBackground} p-4 rounded-lg border ${themeClasses.border}`}>
                         <div className="flex-1 pr-4">
-                          <h4 className={`${themeClasses.text} font-medium mb-1`}>Discord RPC</h4>
+                          <h4 className={`${themeClasses.text} font-medium mb-1`}>{t('settings.privacy.discord_rpc', 'Discord RPC')}</h4>
                           <p className={`${themeClasses.secondaryText} text-sm`}>
-                            Manages the Discord Rich Presence integration. Disabling this will cause 'Modrinth' to no longer show up as a game or app you are using on your Discord profile.
+                            {t('settings.privacy.discord_rpc.description', 'Manages the Discord Rich Presence integration. Disabling this will cause \'Modrinth\' to no longer show up as a game or app you are using on your Discord profile.')}
                           </p>
                           <p className="text-gray-500 text-sm mt-2 italic">
-                            Note: This will not prevent any instance-specific Discord Rich Presence integrations, such as those added by mods. (app restart required to take effect)
+                            {t('settings.privacy.discord_rpc.note', 'Note: This will not prevent any instance-specific Discord Rich Presence integrations, such as those added by mods. (app restart required to take effect)')}
                           </p>
                         </div>
                         

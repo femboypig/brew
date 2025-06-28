@@ -2,12 +2,13 @@
 
 A modern, fast and user-friendly Minecraft launcher focused on pirated minecraft.
 
-## Getting Started
+## Development
 
-1. Download the latest release
-2. Install and run the launcher
-3. Select your Minecraft version
-4. Enjoy playing!
+For all development-related information, please refer to [development.md](development.md).
+
+## Contributing
+
+For all information about contributing to this project, please see [contributing.md](contributing.md).
 
 ## Legal Notice
 

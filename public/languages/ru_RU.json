@@ -1,0 +1,21 @@
+{
+  "metadata": {
+    "id": "ru_RU",
+    "version": "1.0.0",
+    "author": "femboypig"
+  },
+  "app.title": "brew",
+  "app.status.no_instances": "Нет запущенных экземпляров",
+  "settings.title": "Настройки",
+  "settings.tab.appearance": "Внешний вид",
+  "settings.tab.privacy": "Приватность",
+  "settings.appearance.color_theme": "Цветовая тема",
+  "settings.appearance.color_theme.description": "Выберите предпочитаемую цветовую тему для приложения brew.",
+  "settings.appearance.theme.dark": "Тёмная",
+  "settings.appearance.theme.light": "Светлая",
+  "settings.appearance.theme.oled": "OLED",
+  "settings.appearance.theme.sync": "Синхронизировать",
+  "settings.privacy.discord_rpc": "Discord RPC",
+  "settings.privacy.discord_rpc.description": "Управляет интеграцией Discord Rich Presence. Отключение этой опции приведет к тому, что 'brew' больше не будет отображаться как игра или приложение, которое вы используете, в вашем профиле Discord.",
+  "settings.privacy.discord_rpc.note": "Примечание: Это не предотвратит интеграцию Discord Rich Presence для конкретных экземпляров, например, добавленных модами. (для применения требуется перезапуск приложения)"
+} 

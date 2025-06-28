@@ -1,0 +1,21 @@
+{
+  "metadata": {
+    "id": "en_US",
+    "version": "1.0.0",
+    "author": "femboypig"
+  },
+  "app.title": "brew",
+  "app.status.no_instances": "No instances running",
+  "settings.title": "Settings",
+  "settings.tab.appearance": "Appearance",
+  "settings.tab.privacy": "Privacy",
+  "settings.appearance.color_theme": "Color theme",
+  "settings.appearance.color_theme.description": "Select your preferred color theme for Brew App.",
+  "settings.appearance.theme.dark": "Dark",
+  "settings.appearance.theme.light": "Light",
+  "settings.appearance.theme.oled": "OLED",
+  "settings.appearance.theme.sync": "Sync",
+  "settings.privacy.discord_rpc": "Discord RPC",
+  "settings.privacy.discord_rpc.description": "Manages the Discord Rich Presence integration. Disabling this will cause 'brew' to no longer show up as a game or app you are using on your Discord profile.",
+  "settings.privacy.discord_rpc.note": "Note: This will not prevent any instance-specific Discord Rich Presence integrations, such as those added by mods. (app restart required to take effect)"
+} 

@@ -26,7 +26,7 @@
   -webkit-app-region: no-drag;
   app-region: no-drag;
   cursor: default;
-}
+} 
 
 /* Animation for smooth fade-in */
 @keyframes fadeIn {
