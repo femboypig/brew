@@ -17,5 +17,12 @@
   "settings.appearance.theme.sync": "Синхронизировать",
   "settings.privacy.discord_rpc": "Discord RPC",
   "settings.privacy.discord_rpc.description": "Управляет интеграцией Discord Rich Presence. Отключение этой опции приведет к тому, что 'brew' больше не будет отображаться как игра или приложение, которое вы используете, в вашем профиле Discord.",
-  "settings.privacy.discord_rpc.note": "Примечание: Это не предотвратит интеграцию Discord Rich Presence для конкретных экземпляров, например, добавленных модами. (для применения требуется перезапуск приложения)"
+  "settings.privacy.discord_rpc.note": "Примечание: Это не предотвратит интеграцию Discord Rich Presence для конкретных экземпляров, например, добавленных модами. (для применения требуется перезапуск приложения)",
+  "settings.appearance.titlebar_style": "Стиль заголовка окна",
+  "settings.appearance.titlebar_style.description": "Выберите, как должен выглядеть заголовок окна приложения.",
+  "settings.appearance.titlebar.custom": "Пользовательский",
+  "settings.appearance.titlebar.native": "Нативный",
+  "settings.appearance.titlebar.macos": "macOS",
+  "settings.appearance.titlebar.note": "Примечание: Для применения изменений стиля заголовка требуется перезапуск приложения.",
+  "settings.appearance.titlebar.restart_required": "Для применения изменений стиля заголовка необходимо перезапустить приложение."
 } 

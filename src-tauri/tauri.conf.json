@@ -15,7 +15,10 @@
         "title": "brew",
         "width": 1200,
         "height": 800,
-        "decorations": false
+        "decorations": false,
+        "center": false,
+        "minWidth": 1200,
+        "minHeight": 800
       }
     ],
     "security": {

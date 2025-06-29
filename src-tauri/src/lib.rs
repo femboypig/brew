@@ -14,6 +14,7 @@ pub struct Settings {
     pub discord_rpc: bool,
     pub advanced_rendering: bool,
     pub language: String,
+    pub titlebar_style: String,
 }
 
 impl Default for Settings {
@@ -23,6 +24,7 @@ impl Default for Settings {
             discord_rpc: true,
             advanced_rendering: true,
             language: "en_US".to_string(),
+            titlebar_style: "custom".to_string(),
         }
     }
 }
@@ -232,11 +234,18 @@ fn create_default_language() -> Result<Language, Box<dyn Error>> {
             ("settings.appearance.theme.dark".to_string(), "Dark".to_string()),
             ("settings.appearance.theme.light".to_string(), "Light".to_string()),
             ("settings.appearance.theme.oled".to_string(), "OLED".to_string()),
-            ("settings.appearance.theme.system".to_string(), "Sync with".to_string()),
-            ("settings.appearance.theme.system_with".to_string(), "system".to_string()),
+            ("settings.appearance.theme.sync".to_string(), "Sync".to_string()),
             ("settings.privacy.discord_rpc".to_string(), "Discord RPC".to_string()),
             ("settings.privacy.discord_rpc.description".to_string(), "Manages the Discord Rich Presence integration. Disabling this will cause 'Modrinth' to no longer show up as a game or app you are using on your Discord profile.".to_string()),
             ("settings.privacy.discord_rpc.note".to_string(), "Note: This will not prevent any instance-specific Discord Rich Presence integrations, such as those added by mods. (app restart required to take effect)".to_string()),
+            // New translations for titlebar styles <brew app v0.0.5>
+            ("settings.appearance.titlebar_style".to_string(), "Titlebar Style".to_string()),
+            ("settings.appearance.titlebar_style.description".to_string(), "Choose how the application window titlebar should look.".to_string()),
+            ("settings.appearance.titlebar.custom".to_string(), "Custom".to_string()),
+            ("settings.appearance.titlebar.native".to_string(), "Native".to_string()),
+            ("settings.appearance.titlebar.macos".to_string(), "macOS".to_string()),
+            ("settings.appearance.titlebar.note".to_string(), "Note: Changing the titlebar style requires restarting the application.".to_string()),
+            ("settings.appearance.titlebar.restart_required".to_string(), "The application needs to be restarted to apply the titlebar style change.".to_string()),
         ].iter().cloned().collect(),
     })
 }
@@ -378,30 +387,36 @@ async fn update_settings(
     app_handle: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<(), String> {
-    let mut settings_path_guard = state.settings_path.lock().unwrap();
-    
-    if settings_path_guard.is_none() {
-        // Initialize settings path if it's not set yet
-        let path = get_settings_file_path(&app_handle).map_err(|e| e.to_string())?;
-        *settings_path_guard = Some(path);
-    }
-    
-    // Check if language changed
-    let old_settings = state.settings.lock().unwrap().clone();
-    let language_changed = old_settings.language != settings.language;
-    
-    // Update state with new settings
-    *state.settings.lock().unwrap() = settings.clone();
-    
-    // Save updated settings to file
-    if let Some(path) = &*settings_path_guard {
-        save_settings(&settings, path).map_err(|e| e.to_string())?;
-    }
-    
-    // If language changed, load the new language
-    if language_changed {
-        let language = load_language(&app_handle, &settings.language).map_err(|e| e.to_string())?;
-        *state.current_language.lock().unwrap() = language;
+    // Update settings in state
+    {
+        let mut current_settings = state.settings.lock().map_err(|_| "Failed to lock settings")?;
+        
+        // Check if titlebar style has changed
+        let titlebar_style_changed = current_settings.titlebar_style != settings.titlebar_style;
+        
+        // Update settings
+        *current_settings = settings.clone();
+        
+        // Save settings to file
+        if let Some(path) = &*state.settings_path.lock().map_err(|_| "Failed to lock settings path")? {
+            save_settings(&settings, path).map_err(|e| format!("Failed to save settings: {}", e))?;
+        }
+        
+        // If language changed, update the current language
+        if current_settings.language != settings.language {
+            let new_language = load_language(&app_handle, &settings.language)
+                .map_err(|e| format!("Failed to load language: {}", e))?;
+            
+            let mut current_language = state.current_language.lock()
+                .map_err(|_| "Failed to lock current language")?;
+            *current_language = new_language;
+        }
+        
+        // If titlebar style changed, inform the user they need to restart
+        if titlebar_style_changed {
+            println!("Titlebar style changed to: {}", settings.titlebar_style);
+            // Note: The actual change will be applied on next app restart
+        }
     }
     
     Ok(())
@@ -429,67 +444,87 @@ fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
+// Function to apply titlebar style to window
+fn apply_titlebar_style(app: &tauri::App) -> Result<(), Box<dyn Error>> {
+    // Get the main window
+    let window = app.get_webview_window("main").ok_or("Failed to get main window")?;
+    
+    // Get settings
+    let state = app.state::<AppState>();
+    let settings = state.settings.lock().map_err(|_| "Failed to lock settings")?;
+    
+    // Apply titlebar style based on settings
+    match settings.titlebar_style.as_str() {
+        "native" => {
+            // Enable native decorations
+            window.set_decorations(true)?;
+        },
+        "custom" | "macos" => {
+            // Disable native decorations for custom titlebar
+            window.set_decorations(false)?;
+        },
+        _ => {
+            // Default to custom titlebar
+            window.set_decorations(false)?;
+        }
+    }
+    
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let app = tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
-            // Initialize app state
-            let app_handle = app.handle();
+            // Initialize settings path
+            let settings_path = get_settings_file_path(&app.app_handle())?;
+            
+            // Load or create settings
+            let settings = if settings_path.exists() {
+                load_settings(&settings_path)?
+            } else {
+                let default_settings = Settings::default();
+                save_settings(&default_settings, &settings_path)?;
+                default_settings
+            };
             
             // Ensure language files exist
-            if let Err(e) = ensure_language_files_exist(&app_handle) {
-                eprintln!("Failed to create language files: {}", e);
-            }
-            
-            let settings_path = get_settings_file_path(&app_handle).ok();
-            
-            let settings = if let Some(ref path) = settings_path {
-                load_settings(path).unwrap_or_default()
-            } else {
-                Settings::default()
-            };
+            ensure_language_files_exist(&app.app_handle())?;
             
             // Load current language
-            let language = match load_language(&app_handle, &settings.language) {
-                Ok(lang) => lang,
-                Err(e) => {
-                    eprintln!("Failed to load language {}: {}", settings.language, e);
-                    // Use default English translations
-                    match create_default_language() {
-                        Ok(default_lang) => default_lang,
-                        Err(e) => {
-                            eprintln!("Critical error: Failed to create default language: {}", e);
-                            Language {
-                                metadata: LanguageMetadata {
-                                    id: "en_US".to_string(),
-                                    version: "1.0.0".to_string(),
-                                    author: "brew team".to_string(),
-                                },
-                                translations: std::collections::HashMap::new(),
-                            }
-                        }
-                    }
-                }
-            };
+            let current_language = load_language(&app.app_handle(), &settings.language)?;
             
+            // Create app state
             app.manage(AppState {
                 settings: Mutex::new(settings),
-                settings_path: Mutex::new(settings_path),
-                current_language: Mutex::new(language),
+                settings_path: Mutex::new(Some(settings_path)),
+                current_language: Mutex::new(current_language),
             });
+            
+            // Apply titlebar style based on settings
+            apply_titlebar_style(app)?;
             
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             greet,
+            get_system_info,
             get_settings,
             update_settings,
-            get_system_info,
             get_available_languages,
             get_translations,
-            change_language
+            change_language,
         ])
-        .run(tauri::generate_context!())
+        .build(tauri::generate_context!())
         .expect("error while running tauri application");
+        
+    app.run(|_app_handle, event| {
+        match event {
+            tauri::RunEvent::ExitRequested { api, .. } => {
+                api.prevent_exit();
+            }
+            _ => {}
+        }
+    });
 }

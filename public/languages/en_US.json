@@ -17,5 +17,12 @@
   "settings.appearance.theme.sync": "Sync",
   "settings.privacy.discord_rpc": "Discord RPC",
   "settings.privacy.discord_rpc.description": "Manages the Discord Rich Presence integration. Disabling this will cause 'brew' to no longer show up as a game or app you are using on your Discord profile.",
-  "settings.privacy.discord_rpc.note": "Note: This will not prevent any instance-specific Discord Rich Presence integrations, such as those added by mods. (app restart required to take effect)"
+  "settings.privacy.discord_rpc.note": "Note: This will not prevent any instance-specific Discord Rich Presence integrations, such as those added by mods. (app restart required to take effect)",
+  "settings.appearance.titlebar_style": "Titlebar Style",
+  "settings.appearance.titlebar_style.description": "Choose how the application window titlebar should look.",
+  "settings.appearance.titlebar.custom": "Custom",
+  "settings.appearance.titlebar.native": "Native",
+  "settings.appearance.titlebar.macos": "macOS",
+  "settings.appearance.titlebar.note": "Note: Changing the titlebar style requires restarting the application.",
+  "settings.appearance.titlebar.restart_required": "The application needs to be restarted to apply the titlebar style change."
 } 

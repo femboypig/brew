@@ -50,8 +50,8 @@ const SplashScreen = ({ onInitialized, progress = 0, onLanguageLoaded }: SplashS
         setLoadingProgress(100); // Jump to 100% immediately after language is loaded
         
         // Complete initialization with minimal delay
-        setTimeout(() => {
-          onInitialized();
+          setTimeout(() => {
+            onInitialized();
         }, 100); // Reduced delay from 500ms to 100ms
         
         return true;

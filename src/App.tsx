@@ -10,6 +10,7 @@ interface Settings {
   discord_rpc: boolean;
   advanced_rendering: boolean;
   language: string;
+  titlebar_style: string; // 'custom', 'native', 'macos'
 }
 
 // Определение типа метаданных языка
@@ -32,6 +33,7 @@ function App() {
   const [activeSettingsTab, setActiveSettingsTab] = useState('appearance');
   const [discordRpcEnabled, setDiscordRpcEnabled] = useState(true);
   const [selectedTheme, setSelectedTheme] = useState('system');
+  const [selectedTitlebarStyle, setSelectedTitlebarStyle] = useState('custom');
   const [isLoading, setIsLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [currentLanguage, setCurrentLanguage] = useState<string>('en_US');
@@ -67,22 +69,30 @@ function App() {
             setSelectedTheme(settings.theme);
             setDiscordRpcEnabled(settings.discord_rpc);
             setCurrentLanguage(settings.language);
+            // Устанавливаем стиль тайтлбара, если он есть в настройках, иначе используем 'custom' по умолчанию
+            setSelectedTitlebarStyle(settings.titlebar_style || 'custom');
+            
+            // Apply theme immediately from the settings instead of using state
+            // This ensures the correct theme is applied without waiting for React state updates
+            applyTheme(settings.theme);
           }
           setLoadingProgress(70);
         } catch (e) {
           console.error('Failed to load settings:', e);
           // Используем значения по умолчанию и создаем файл настроек
+          const defaultTheme = 'system';
           updateSettings({
-            theme: 'system',
+            theme: defaultTheme,
             discord_rpc: true,
             advanced_rendering: true,
-            language: 'en_US'
+            language: 'en_US',
+            titlebar_style: 'custom'
           });
+          
+          // Apply default theme immediately
+          applyTheme(defaultTheme);
           setLoadingProgress(70);
         }
-        
-        // Apply theme before showing the main UI
-        applyTheme(selectedTheme);
         
         // Finalize loading
         setLoadingProgress(100);
@@ -112,7 +122,8 @@ function App() {
       theme,
       discord_rpc: discordRpcEnabled,
       advanced_rendering: true,
-      language: currentLanguage
+      language: currentLanguage,
+      titlebar_style: selectedTitlebarStyle
     });
     
     // Применить тему к документу
@@ -127,13 +138,32 @@ function App() {
       theme: selectedTheme,
       discord_rpc: newValue,
       advanced_rendering: true,
-      language: currentLanguage
+      language: currentLanguage,
+      titlebar_style: selectedTitlebarStyle
     });
+  };
+  
+  // Обработка изменения стиля тайтлбара
+  const handleTitlebarStyleChange = (style: string) => {
+    setSelectedTitlebarStyle(style);
+    updateSettings({
+      theme: selectedTheme,
+      discord_rpc: discordRpcEnabled,
+      advanced_rendering: true,
+      language: currentLanguage,
+      titlebar_style: style
+    });
+    
+    // Показать уведомление о необходимости перезапуска
+    alert(t('settings.appearance.titlebar.restart_required', 'The application needs to be restarted to apply the titlebar style change.'));
   };
   
   // Function to apply theme
   const applyTheme = (theme: string) => {
     document.documentElement.setAttribute('data-theme', theme);
+    
+    // Save theme preference to localStorage for persistent experience
+    localStorage.setItem('brew-theme', theme);
     
     // Add theme-specific CSS variables
     const root = document.documentElement;
@@ -159,6 +189,9 @@ function App() {
       root.style.setProperty('--text-secondary', '#a0a0a0');
       root.style.setProperty('--border-color', '#222222');
     } else if (theme === 'system') {
+      // Remove from localStorage to use system preference
+      localStorage.removeItem('brew-theme');
+      
       // Use system theme if available, fallback to dark
       if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         root.style.setProperty('--bg-primary', '#0a0a0a');
@@ -247,20 +280,59 @@ function App() {
 
   return (
     <div className={`flex h-screen w-screen ${themeClasses.background} overflow-hidden relative fade-in`}>
-      {/* Titlebar - height 55px */}
+      {/* Titlebar - height 55px - отображаем для всех стилей */}
       <div 
         className={`w-full h-[55px] ${themeClasses.secondaryBackground} fixed top-0 left-0 right-0 flex items-center justify-between border-b ${themeClasses.border} z-10`}
         data-tauri-drag-region
       >
         {/* Left side with logo - adjusted to avoid overlap */}
         <div className="flex items-center h-full pl-0 z-20 relative top-[-4px]" data-tauri-drag-region>
-          <span className={`${themeClasses.text} font-medium text-2xl tracking-tight ml-16 antialiased`} data-tauri-drag-region>{t('app.title', 'brew')}</span>
+          {selectedTitlebarStyle === 'macos' ? (
+            <>
+              {/* macOS style traffic light controls */}
+              <div className="flex items-center ml-3 space-x-2 mr-3">
+                <button 
+                  className="w-3.5 h-3.5 rounded-full bg-[#ff5f57] hover:bg-[#ff5f57] hover:brightness-110 active:brightness-90 no-drag flex items-center justify-center"
+                  onClick={() => appWindow.close()}
+                >
+                  <span className="opacity-0 hover:opacity-100 text-[8px] text-[#450000]">✕</span>
+                </button>
+                <button 
+                  className="w-3.5 h-3.5 rounded-full bg-[#febc2e] hover:bg-[#febc2e] hover:brightness-110 active:brightness-90 no-drag flex items-center justify-center"
+                  onClick={() => appWindow.minimize()}
+                >
+                  <span className="opacity-0 hover:opacity-100 text-[8px] text-[#5a4000]">−</span>
+                </button>
+                <button 
+                  className="w-3.5 h-3.5 rounded-full bg-[#28c840] hover:bg-[#28c840] hover:brightness-110 active:brightness-90 no-drag flex items-center justify-center"
+                  onClick={() => appWindow.toggleMaximize()}
+                >
+                  <span className="opacity-0 hover:opacity-100 text-[8px] text-[#004d00]">+</span>
+                </button>
+              </div>
+              
+              {/* App icon and title */}
+              <div className="flex items-center">
+                <img src={appIcon} alt="App Icon" className="w-9 h-9 mr-2" />
+                <span className={`${themeClasses.text} font-medium text-2xl tracking-tight antialiased`} data-tauri-drag-region>
+                  {t('app.title', 'brew')}
+                </span>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Custom style with logo on left */}
+              <span className={`${themeClasses.text} font-medium text-2xl tracking-tight ml-16 antialiased`} data-tauri-drag-region>{t('app.title', 'brew')}</span>
+            </>
+          )}
         </div>
         
-        {/* App icon at the intersection */}
+        {/* App icon at the intersection - для custom и native стилей */}
+        {selectedTitlebarStyle !== 'macos' && (
         <div className="absolute left-[16px] top-[7px] z-30">
           <img src={appIcon} alt="App Icon" className="w-9 h-9" />
         </div>
+        )}
         
         {/* Right side with status indicator and window controls - adjusted to avoid overlap */}
         <div className="flex items-center h-full relative top-[-4px]" data-tauri-drag-region>
@@ -270,7 +342,8 @@ function App() {
             <span className={`text-sm ${themeClasses.secondaryText} antialiased`} data-tauri-drag-region>{t('app.status.no_instances', 'No instances running')}</span>
           </div>
           
-          {/* Window controls with subtle hover effects and smoother transitions */}
+          {/* Window controls - только для custom стиля */}
+          {selectedTitlebarStyle === 'custom' && (
           <div className="flex no-drag">
             <button 
               className={`w-10 h-10 flex items-center justify-center hover:bg-[var(--bg-card)] active:scale-95 active:translate-y-[1px] ${themeClasses.secondaryText} rounded-full mx-1 transition-all no-drag`}
@@ -298,6 +371,7 @@ function App() {
               </svg>
             </button>
           </div>
+          )}
         </div>
       </div>
 
@@ -453,7 +527,7 @@ function App() {
                   <div className="flex items-center">
                     <img src={appIcon} alt="App Icon" className="w-8 h-8 mr-3" />
                     <div>
-                      <p className={`${themeClasses.secondaryText} text-sm font-medium`}>brew App 0.0.4</p>
+                      <p className={`${themeClasses.secondaryText} text-sm font-medium`}>brew App 0.0.5</p>
                       <p className={`${themeClasses.secondaryText} text-xs`}>Linux {systemInfo.version}</p>
                     </div>
                   </div>
@@ -468,7 +542,7 @@ function App() {
                 {/* Content for the active tab */}
                 <div className="p-6 h-full">
                   {activeSettingsTab === 'appearance' && (
-                    <div>
+                    <div className="h-[400px] overflow-y-auto pr-2">
                       <h3 className={`text-xl ${themeClasses.text} font-medium mb-2`}>{t('settings.appearance.color_theme', 'Color theme')}</h3>
                       <p className={`${themeClasses.secondaryText} text-sm mb-5`}>{t('settings.appearance.color_theme.description', 'Select your preferred color theme for Modrinth App.')}</p>
                       
@@ -476,7 +550,14 @@ function App() {
                       <div className="grid grid-cols-2 gap-4 max-w-md">
                         {/* Dark theme */}
                         <div 
-                          className={`bg-[#141414] rounded-2xl p-1 cursor-pointer border ${selectedTheme === 'dark' ? 'border-gray-500' : 'border-[#232323]'}`}
+                          className={`rounded-2xl p-1 cursor-pointer border transition-colors duration-200 ${selectedTheme === 'dark' 
+                            ? 'border-[#ffcc40] shadow-md' 
+                            : `border-[var(--border-color)]`}`}
+                          style={{
+                            backgroundColor: themeClasses.secondaryBackground.includes('bg-[var(--bg-secondary)]') 
+                              ? 'var(--bg-secondary)' 
+                              : '#141414'
+                          }}
                           onClick={() => handleThemeChange('dark')}
                         >
                           {/* Improved preview with card UI */}
@@ -488,13 +569,13 @@ function App() {
                             </div>
                           </div>
                           
-                          <div className="flex items-center px-2 py-2">
+                          <div className={`flex items-center px-2 py-2 ${themeClasses.text}`}>
                             <div className={`w-4 h-4 rounded-full border ${selectedTheme === 'dark' ? 'border-[#ffcc40]' : 'border-gray-500'} flex items-center justify-center mr-2`}>
                               {selectedTheme === 'dark' && (
                                 <div className="w-2 h-2 rounded-full bg-[#ffcc40]"></div>
                               )}
                             </div>
-                            <span className="text-gray-300 mr-1">{t('settings.appearance.theme.dark', 'Dark')}</span>
+                            <span className={`mr-1 ${selectedTheme === 'dark' ? 'text-[#ffcc40]' : ''}`}>{t('settings.appearance.theme.dark', 'Dark')}</span>
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
                               <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
                             </svg>
@@ -503,7 +584,14 @@ function App() {
                         
                         {/* Light theme */}
                         <div 
-                          className={`bg-[#141414] rounded-2xl p-1 cursor-pointer border ${selectedTheme === 'light' ? 'border-gray-500' : 'border-[#232323]'}`}
+                          className={`rounded-2xl p-1 cursor-pointer border transition-colors duration-200 ${selectedTheme === 'light' 
+                            ? 'border-[#ffcc40] shadow-md' 
+                            : `border-[var(--border-color)]`}`}
+                          style={{
+                            backgroundColor: themeClasses.secondaryBackground.includes('bg-[var(--bg-secondary)]') 
+                              ? 'var(--bg-secondary)' 
+                              : '#141414'
+                          }}
                           onClick={() => handleThemeChange('light')}
                         >
                           {/* Improved preview with card UI */}
@@ -515,13 +603,13 @@ function App() {
                             </div>
                           </div>
                           
-                          <div className="flex items-center px-2 py-2">
+                          <div className={`flex items-center px-2 py-2 ${themeClasses.text}`}>
                             <div className={`w-4 h-4 rounded-full border ${selectedTheme === 'light' ? 'border-[#ffcc40]' : 'border-gray-500'} flex items-center justify-center mr-2`}>
                               {selectedTheme === 'light' && (
                                 <div className="w-2 h-2 rounded-full bg-[#ffcc40]"></div>
                               )}
                             </div>
-                            <span className="text-gray-300 mr-1">{t('settings.appearance.theme.light', 'Light')}</span>
+                            <span className={`mr-1 ${selectedTheme === 'light' ? 'text-[#ffcc40]' : ''}`}>{t('settings.appearance.theme.light', 'Light')}</span>
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
                               <circle cx="12" cy="12" r="4"></circle>
                               <path d="M12 2v2"></path>
@@ -538,7 +626,14 @@ function App() {
                         
                         {/* OLED theme */}
                         <div 
-                          className={`bg-[#141414] rounded-2xl p-1 cursor-pointer border ${selectedTheme === 'oled' ? 'border-gray-500' : 'border-[#232323]'}`}
+                          className={`rounded-2xl p-1 cursor-pointer border transition-colors duration-200 ${selectedTheme === 'oled' 
+                            ? 'border-[#ffcc40] shadow-md' 
+                            : `border-[var(--border-color)]`}`}
+                          style={{
+                            backgroundColor: themeClasses.secondaryBackground.includes('bg-[var(--bg-secondary)]') 
+                              ? 'var(--bg-secondary)' 
+                              : '#141414'
+                          }}
                           onClick={() => handleThemeChange('oled')}
                         >
                           {/* Improved preview with card UI */}
@@ -550,19 +645,26 @@ function App() {
                             </div>
                           </div>
                           
-                          <div className="flex items-center px-2 py-2">
+                          <div className={`flex items-center px-2 py-2 ${themeClasses.text}`}>
                             <div className={`w-4 h-4 rounded-full ${selectedTheme === 'oled' ? 'border-[#ffcc40]' : 'border-gray-500'} flex items-center justify-center mr-2 border`}>
                               {selectedTheme === 'oled' && (
                                 <div className="w-2 h-2 rounded-full bg-[#ffcc40]"></div>
                               )}
                             </div>
-                            <span className="text-gray-300">{t('settings.appearance.theme.oled', 'OLED')}</span>
+                            <span className={`mr-1 ${selectedTheme === 'oled' ? 'text-[#ffcc40]' : ''}`}>{t('settings.appearance.theme.oled', 'OLED')}</span>
                           </div>
                         </div>
                         
                         {/* Sync with system */}
                         <div 
-                          className={`bg-[#141414] rounded-2xl p-1 cursor-pointer border ${selectedTheme === 'system' ? 'border-gray-500' : 'border-[#232323]'}`}
+                          className={`rounded-2xl p-1 cursor-pointer border transition-colors duration-200 ${selectedTheme === 'system' 
+                            ? 'border-[#ffcc40] shadow-md' 
+                            : `border-[var(--border-color)]`}`}
+                          style={{
+                            backgroundColor: themeClasses.secondaryBackground.includes('bg-[var(--bg-secondary)]') 
+                              ? 'var(--bg-secondary)' 
+                              : '#141414'
+                          }}
                           onClick={() => handleThemeChange('system')}
                         >
                           {/* Improved preview with card UI */}
@@ -578,21 +680,151 @@ function App() {
                             </div>
                           </div>
                           
-                          <div className="flex items-center px-2 py-2">
+                          <div className={`flex items-center px-2 py-2 ${themeClasses.text}`}>
                             <div className={`w-4 h-4 rounded-full border ${selectedTheme === 'system' ? 'border-[#ffcc40]' : 'border-gray-500'} flex items-center justify-center mr-2`}>
                               {selectedTheme === 'system' && (
                                 <div className="w-2 h-2 rounded-full bg-[#ffcc40]"></div>
                               )}
                             </div>
-                            <span className="text-gray-300">{t('settings.appearance.theme.sync', 'Sync')}</span>
+                            <span className={`${selectedTheme === 'system' ? 'text-[#ffcc40]' : ''}`}>{t('settings.appearance.theme.sync', 'Sync')}</span>
                           </div>
                         </div>
                       </div>
+
+                      {/* Titlebar Style Section */}
+                      <h3 className={`text-xl ${themeClasses.text} font-medium mb-2 mt-10`}>{t('settings.appearance.titlebar_style', 'Titlebar Style')}</h3>
+                      <p className={`${themeClasses.secondaryText} text-sm mb-5`}>{t('settings.appearance.titlebar_style.description', 'Choose how the application window titlebar should look.')}</p>
+                      
+                      {/* Titlebar style selector grid */}
+                      <div className="grid grid-cols-3 gap-4 max-w-md">
+                        {/* Custom titlebar (current style) */}
+                        <div 
+                          className={`rounded-2xl p-1 cursor-pointer border transition-colors duration-200 ${selectedTitlebarStyle === 'custom' 
+                            ? 'border-[#ffcc40] shadow-md' 
+                            : `border-[var(--border-color)]`}`}
+                          style={{
+                            backgroundColor: themeClasses.secondaryBackground.includes('bg-[var(--bg-secondary)]') 
+                              ? 'var(--bg-secondary)' 
+                              : '#141414'
+                          }}
+                          onClick={() => handleTitlebarStyleChange('custom')}
+                        >
+                          {/* Preview of custom titlebar - только кнопки */}
+                          <div className={`${themeClasses.secondaryBackground} p-2 rounded-t-2xl mb-0 h-[50px] relative overflow-hidden border-b ${themeClasses.border} flex items-center justify-end`}>
+                            {/* Window controls (right aligned) */}
+                            <div className="flex space-x-1 mr-2">
+                              <div className="w-10 h-10 rounded-full bg-[var(--bg-card)] flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
+                                  <line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                              </div>
+                              <div className="w-10 h-10 rounded-full bg-[var(--bg-card)] flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
+                                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                </svg>
+                              </div>
+                              <div className="w-10 h-10 rounded-full bg-[#ff0000] flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <line x1="18" y1="6" x2="6" y2="18" />
+                                  <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className={`flex items-center px-2 py-2 ${themeClasses.text}`}>
+                            <div className={`w-4 h-4 rounded-full border ${selectedTitlebarStyle === 'custom' ? 'border-[#ffcc40]' : 'border-gray-500'} flex items-center justify-center mr-2`}>
+                              {selectedTitlebarStyle === 'custom' && (
+                                <div className="w-2 h-2 rounded-full bg-[#ffcc40]"></div>
+                              )}
+                            </div>
+                            <span className={`${selectedTitlebarStyle === 'custom' ? 'text-[#ffcc40]' : ''}`}>{t('settings.appearance.titlebar.custom', 'Custom')}</span>
+                          </div>
+                        </div>
+                        
+                        {/* Native titlebar (Windows style) */}
+                        <div 
+                          className={`rounded-2xl p-1 cursor-pointer border transition-colors duration-200 ${selectedTitlebarStyle === 'native' 
+                            ? 'border-[#ffcc40] shadow-md' 
+                            : `border-[var(--border-color)]`}`}
+                          style={{
+                            backgroundColor: themeClasses.secondaryBackground.includes('bg-[var(--bg-secondary)]') 
+                              ? 'var(--bg-secondary)' 
+                              : '#141414'
+                          }}
+                          onClick={() => handleTitlebarStyleChange('native')}
+                        >
+                          {/* Preview of native Windows titlebar - только кнопки */}
+                          <div className="bg-[#f0f0f0] p-2 rounded-t-2xl mb-0 h-[50px] relative overflow-hidden flex items-center justify-end">
+                            {/* Windows controls */}
+                            <div className="flex h-full">
+                              <div className="w-12 h-full bg-[#e5e5e5] flex items-center justify-center">
+                                <div className="w-2.5 h-0.5 bg-[#333333]"></div>
+                              </div>
+                              <div className="w-12 h-full bg-[#e5e5e5] flex items-center justify-center">
+                                <div className="w-2.5 h-2.5 border border-[#333333]"></div>
+                              </div>
+                              <div className="w-12 h-full bg-[#e81123] flex items-center justify-center">
+                                <div className="w-2.5 h-2.5 relative">
+                                  <div className="absolute w-3 h-0.5 bg-white rotate-45"></div>
+                                  <div className="absolute w-3 h-0.5 bg-white -rotate-45"></div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className={`flex items-center px-2 py-2 ${themeClasses.text}`}>
+                            <div className={`w-4 h-4 rounded-full border ${selectedTitlebarStyle === 'native' ? 'border-[#ffcc40]' : 'border-gray-500'} flex items-center justify-center mr-2`}>
+                              {selectedTitlebarStyle === 'native' && (
+                                <div className="w-2 h-2 rounded-full bg-[#ffcc40]"></div>
+                              )}
+                            </div>
+                            <span className={`${selectedTitlebarStyle === 'native' ? 'text-[#ffcc40]' : ''}`}>{t('settings.appearance.titlebar.native', 'Native')}</span>
+                          </div>
+                        </div>
+                        
+                        {/* macOS style titlebar */}
+                        <div 
+                          className={`rounded-2xl p-1 cursor-pointer border transition-colors duration-200 ${selectedTitlebarStyle === 'macos' 
+                            ? 'border-[#ffcc40] shadow-md' 
+                            : `border-[var(--border-color)]`}`}
+                          style={{
+                            backgroundColor: themeClasses.secondaryBackground.includes('bg-[var(--bg-secondary)]') 
+                              ? 'var(--bg-secondary)' 
+                              : '#141414'
+                          }}
+                          onClick={() => handleTitlebarStyleChange('macos')}
+                        >
+                          {/* Preview of macOS style titlebar - only buttons */}
+                          <div className={`${themeClasses.secondaryBackground} p-2 rounded-t-2xl mb-0 h-[50px] relative overflow-hidden border-b ${themeClasses.border} flex items-center`}>
+                            {/* Traffic light controls (left aligned) */}
+                            <div className="flex space-x-2 ml-3">
+                              <div className="w-3.5 h-3.5 rounded-full bg-[#ff5f57]"></div>
+                              <div className="w-3.5 h-3.5 rounded-full bg-[#febc2e]"></div>
+                              <div className="w-3.5 h-3.5 rounded-full bg-[#28c840]"></div>
+                            </div>
+                          </div>
+                          
+                          <div className={`flex items-center px-2 py-2 ${themeClasses.text}`}>
+                            <div className={`w-4 h-4 rounded-full border ${selectedTitlebarStyle === 'macos' ? 'border-[#ffcc40]' : 'border-gray-500'} flex items-center justify-center mr-2`}>
+                              {selectedTitlebarStyle === 'macos' && (
+                                <div className="w-2 h-2 rounded-full bg-[#ffcc40]"></div>
+                              )}
+                            </div>
+                            <span className={`${selectedTitlebarStyle === 'macos' ? 'text-[#ffcc40]' : ''}`}>{t('settings.appearance.titlebar.macos', 'macOS')}</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Note about restart */}
+                      <p className={`${themeClasses.secondaryText} text-sm mt-3 italic`}>
+                        {t('settings.appearance.titlebar.note', 'Note: Changing the titlebar style requires restarting the application.')}
+                      </p>
                     </div>
                   )}
                   
                   {activeSettingsTab === 'privacy' && (
-                    <div>
+                    <div className="h-[400px] overflow-y-auto pr-2">
                       <h3 className={`text-xl ${themeClasses.text} font-medium mb-4`}>{t('settings.tab.privacy', 'Privacy Settings')}</h3>
                       
                       {/* Discord RPC setting with toggle */}
