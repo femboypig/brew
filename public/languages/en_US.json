@@ -23,6 +23,5 @@
   "settings.appearance.titlebar.custom": "Custom",
   "settings.appearance.titlebar.native": "Native",
   "settings.appearance.titlebar.macos": "macOS",
-  "settings.appearance.titlebar.note": "Note: Changing the titlebar style requires restarting the application.",
-  "settings.appearance.titlebar.restart_required": "The application needs to be restarted to apply the titlebar style change."
+  "settings.appearance.titlebar.note": "Note: Changing the titlebar style to native requires restarting the application."
 } 
