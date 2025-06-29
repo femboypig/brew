@@ -709,22 +709,22 @@ function App() {
                           }}
                           onClick={() => handleTitlebarStyleChange('custom')}
                         >
-                          {/* Preview of custom titlebar - только кнопки */}
-                          <div className={`${themeClasses.secondaryBackground} p-2 rounded-t-2xl mb-0 h-[50px] relative overflow-hidden border-b ${themeClasses.border} flex items-center justify-end`}>
-                            {/* Window controls (right aligned) */}
-                            <div className="flex space-x-1 mr-2">
-                              <div className="w-10 h-10 rounded-full bg-[var(--bg-card)] flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
+                          {/* Preview of custom titlebar - buttons only */}
+                          <div className={`${themeClasses.secondaryBackground} p-2 rounded-t-2xl mb-0 h-[50px] relative overflow-hidden border-b ${themeClasses.border} flex items-center justify-center`}>
+                            {/* Window controls */}
+                            <div className="flex space-x-1">
+                              <div className="w-8 h-8 rounded-full hover:bg-[var(--bg-card)] flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
                                   <line x1="5" y1="12" x2="19" y2="12" />
                                 </svg>
                               </div>
-                              <div className="w-10 h-10 rounded-full bg-[var(--bg-card)] flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
+                              <div className="w-8 h-8 rounded-full hover:bg-[var(--bg-card)] flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
                                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                                 </svg>
                               </div>
-                              <div className="w-10 h-10 rounded-full bg-[#ff0000] flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <div className="w-8 h-8 rounded-full hover:bg-[#ff3333] flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
                                   <line x1="18" y1="6" x2="6" y2="18" />
                                   <line x1="6" y1="6" x2="18" y2="18" />
                                 </svg>
@@ -754,20 +754,20 @@ function App() {
                           }}
                           onClick={() => handleTitlebarStyleChange('native')}
                         >
-                          {/* Preview of native Windows titlebar - только кнопки */}
-                          <div className="bg-[#f0f0f0] p-2 rounded-t-2xl mb-0 h-[50px] relative overflow-hidden flex items-center justify-end">
+                          {/* Preview of native Windows titlebar - buttons only */}
+                          <div className="bg-[#f0f0f0] p-2 rounded-t-2xl mb-0 h-[50px] relative overflow-hidden flex items-center justify-center">
                             {/* Windows controls */}
-                            <div className="flex h-full">
-                              <div className="w-12 h-full bg-[#e5e5e5] flex items-center justify-center">
+                            <div className="flex h-[36px]">
+                              <div className="w-11 h-full hover:bg-[#e5e5e5] flex items-center justify-center">
                                 <div className="w-2.5 h-0.5 bg-[#333333]"></div>
                               </div>
-                              <div className="w-12 h-full bg-[#e5e5e5] flex items-center justify-center">
+                              <div className="w-11 h-full hover:bg-[#e5e5e5] flex items-center justify-center">
                                 <div className="w-2.5 h-2.5 border border-[#333333]"></div>
                               </div>
-                              <div className="w-12 h-full bg-[#e81123] flex items-center justify-center">
+                              <div className="w-11 h-full hover:bg-[#e81123] flex items-center justify-center">
                                 <div className="w-2.5 h-2.5 relative">
-                                  <div className="absolute w-3 h-0.5 bg-white rotate-45"></div>
-                                  <div className="absolute w-3 h-0.5 bg-white -rotate-45"></div>
+                                  <div className="absolute w-3 h-0.5 bg-[#333333] rotate-45"></div>
+                                  <div className="absolute w-3 h-0.5 bg-[#333333] -rotate-45"></div>
                                 </div>
                               </div>
                             </div>
@@ -795,13 +795,13 @@ function App() {
                           }}
                           onClick={() => handleTitlebarStyleChange('macos')}
                         >
-                          {/* Preview of macOS style titlebar - only buttons */}
-                          <div className={`${themeClasses.secondaryBackground} p-2 rounded-t-2xl mb-0 h-[50px] relative overflow-hidden border-b ${themeClasses.border} flex items-center`}>
-                            {/* Traffic light controls (left aligned) */}
-                            <div className="flex space-x-2 ml-3">
-                              <div className="w-3.5 h-3.5 rounded-full bg-[#ff5f57]"></div>
-                              <div className="w-3.5 h-3.5 rounded-full bg-[#febc2e]"></div>
-                              <div className="w-3.5 h-3.5 rounded-full bg-[#28c840]"></div>
+                          {/* Preview of macOS style titlebar - buttons only */}
+                          <div className={`${themeClasses.secondaryBackground} p-2 rounded-t-2xl mb-0 h-[50px] relative overflow-hidden border-b ${themeClasses.border} flex items-center justify-center`}>
+                            {/* Traffic light controls */}
+                            <div className="flex space-x-2">
+                              <div className="w-3 h-3 rounded-full bg-[#ff5f57]"></div>
+                              <div className="w-3 h-3 rounded-full bg-[#febc2e]"></div>
+                              <div className="w-3 h-3 rounded-full bg-[#28c840]"></div>
                             </div>
                           </div>
                           
