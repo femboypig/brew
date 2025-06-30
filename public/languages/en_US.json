@@ -6,6 +6,7 @@
   },
   "app.title": "brew",
   "app.status.no_instances": "No instances running",
+  "tooltip.settings": "Settings",
   "settings.title": "Settings",
   "settings.tab.appearance": "Appearance",
   "settings.tab.privacy": "Privacy",

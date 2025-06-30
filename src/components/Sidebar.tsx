@@ -1,18 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { ThemeClasses } from '../types/interfaces';
 
 interface SidebarProps {
-  themeClasses: {
-    background: string;
-    secondaryBackground: string;
-    cardBackground: string;
-    text: string;
-    secondaryText: string;
-    border: string;
-  };
+  themeClasses: ThemeClasses;
   titlebarHeight: number;
   overlapAmount: number;
   bottomPadding: number;
   onSettingsClick: () => void;
+  t: (key: string, defaultValue?: string) => string;
+  showTooltip: (text: string, position: { top: number; left?: number }) => void;
+  hideTooltip: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ 
@@ -20,13 +17,23 @@ const Sidebar: React.FC<SidebarProps> = ({
   titlebarHeight, 
   overlapAmount, 
   bottomPadding, 
-  onSettingsClick 
+  onSettingsClick,
+  t,
+  showTooltip,
+  hideTooltip
 }) => {
   // Calculate settings button position
   const sidebarWidth = 70;
   const buttonSize = 48; // w-12 = 48px (12 * 4px in Tailwind)
   const visibleSidebarWidth = sidebarWidth - overlapAmount; // 61px
   const buttonLeftPosition = (visibleSidebarWidth - buttonSize) / 2; // Center in visible area
+  
+  // Обработчик для наведения на кнопку настроек
+  const handleMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const buttonCenterY = rect.top + rect.height / 2;
+    showTooltip(t('tooltip.settings', 'Settings'), { top: buttonCenterY });
+  };
   
   return (
     <aside 
@@ -46,6 +53,8 @@ const Sidebar: React.FC<SidebarProps> = ({
           className={`w-12 h-12 flex items-center justify-center hover:bg-[var(--bg-card)] hover:shadow-md active:scale-95 active:translate-y-[1px] ${themeClasses.secondaryText} hover:${themeClasses.text} rounded-full transition-all absolute`}
           style={{ left: `${buttonLeftPosition}px` }}
           onClick={onSettingsClick}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={hideTooltip}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"
             strokeWidth="1.5" viewBox="0 0 24 24" className="w-7 h-7">

@@ -7,6 +7,16 @@ import MainContent from './components/MainContent';
 import SettingsModal from './components/SettingsModal';
 import { Settings, ThemeClasses } from './types/interfaces';
 
+// Интерфейс для тултипа
+interface TooltipData {
+  show: boolean;
+  text: string;
+  position: {
+    top: number;
+    left?: number;
+  };
+}
+
 function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [systemInfo, setSystemInfo] = useState({ os: '', version: '' });
@@ -20,6 +30,9 @@ function App() {
   const [availableLanguages, setAvailableLanguages] = useState<any[]>([]);
   const [translations, setTranslations] = useState<{[key: string]: string}>({});
   
+  // Состояние для тултипов
+  const [tooltip, setTooltip] = useState<TooltipData | null>(null);
+  
   // Define exact dimensions for precise calculations
   const titlebarHeight = 55;
   const sidebarWidth = 70;
@@ -29,6 +42,24 @@ function App() {
   // Функция для перевода текста с использованием загруженных переводов
   const t = (key: string, defaultValue?: string): string => {
     return translations[key] || defaultValue || key;
+  };
+  
+  // Функция для показа тултипа с задержкой
+  const showTooltipWithDelay = (text: string, position: { top: number, left?: number }) => {
+    const timer = setTimeout(() => {
+      setTooltip({
+        show: true,
+        text,
+        position
+      });
+    }, 250); // 250ms задержка
+    
+    return () => clearTimeout(timer);
+  };
+  
+  // Функция для скрытия тултипа
+  const hideTooltip = () => {
+    setTooltip(null);
   };
   
   // Загрузка системной информации и настроек при старте
@@ -268,6 +299,9 @@ function App() {
           overlapAmount={overlapAmount}
           bottomPadding={bottomPadding}
           onSettingsClick={() => setShowSettings(true)}
+          t={t}
+          showTooltip={(text, position) => showTooltipWithDelay(text, position)}
+          hideTooltip={hideTooltip}
         />
 
         {/* Main Content Component */}
@@ -276,6 +310,8 @@ function App() {
           titlebarHeight={titlebarHeight}
           sidebarWidth={sidebarWidth}
           overlapAmount={overlapAmount}
+          tooltip={tooltip}
+          selectedTheme={selectedTheme}
         />
       </div>
       
