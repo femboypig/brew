@@ -29,12 +29,12 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
       <div className="flex-1 overflow-y-auto pt-10 px-4">
         {/* Appearance button with theme-adaptive active effect */}
         <button
-          className={`w-full py-1 px-4 mb-2 text-left rounded-xl flex items-center transition-all
+          className={`w-full py-1 px-4 mb-2 text-left rounded-xl flex items-center transition-all sidebar-button
             ${activeSettingsTab === 'appearance' 
               ? 'text-[#ffcc40] shadow-inner border' 
-              : `${themeClasses.secondaryText} hover:bg-[var(--bg-card)] hover:text-[var(--text-primary)]`
+              : `${themeClasses.secondaryText} hover:text-[var(--text-primary)]`
             }
-            active:scale-[0.98] active:translate-y-[1px] focus:outline-none
+            focus:outline-none
           `}
           style={{
             backgroundColor: activeSettingsTab === 'appearance' ? 'rgba(255, 204, 64, 0.15)' : '',
@@ -55,12 +55,12 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
 
         {/* Privacy button */}
         <button
-          className={`w-full py-1 px-4 mb-2 text-left rounded-xl flex items-center transition-all
+          className={`w-full py-1 px-4 mb-2 text-left rounded-xl flex items-center transition-all sidebar-button
             ${activeSettingsTab === 'privacy' 
               ? 'text-[#ffcc40] shadow-inner border' 
-              : `${themeClasses.secondaryText} hover:bg-[var(--bg-card)] hover:text-[var(--text-primary)]`
+              : `${themeClasses.secondaryText} hover:text-[var(--text-primary)]`
             }
-            active:scale-[0.98] active:translate-y-[1px] focus:outline-none
+            focus:outline-none
           `}
           style={{
             backgroundColor: activeSettingsTab === 'privacy' ? 'rgba(255, 204, 64, 0.15)' : '',
@@ -83,7 +83,7 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
           <img src={appIcon} alt="App Icon" className="w-8 h-8 mr-3" />
           <div>
             <p className={`${themeClasses.secondaryText} text-sm font-medium`}>brew App 0.0.5</p>
-            <p className={`${themeClasses.secondaryText} text-xs`}>Linux {systemInfo.version}</p>
+            <p className={`${themeClasses.secondaryText} text-xs`}>{systemInfo.os} {systemInfo.version}</p>
           </div>
         </div>
       </div>

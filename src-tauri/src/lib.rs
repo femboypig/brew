@@ -425,10 +425,15 @@ async fn update_settings(
 // Command to get system information
 #[tauri::command]
 fn get_system_info() -> Result<serde_json::Value, String> {
-    let os_type = std::env::consts::OS;
-    
-    // Properly access os_info version without directly accessing private fields
     let os_info = os_info::get();
+    
+    // Correctly determine the OS type, taking into account the macOS specifics
+    let os_type = match os_info.os_type() {
+        os_info::Type::Macos => "macOS",
+        _ => std::env::consts::OS
+    };
+    
+    // Get the OS version
     let os_version = format!("{}", os_info.version());
 
     let system_info = serde_json::json!({

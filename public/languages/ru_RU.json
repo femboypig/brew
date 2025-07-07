@@ -23,6 +23,10 @@
   "settings.appearance.titlebar_style.description": "Выберите, как должен выглядеть заголовок окна приложения.",
   "settings.appearance.titlebar.custom": "Кастом",
   "settings.appearance.titlebar.native": "Нативный",
-  "settings.appearance.titlebar.macos": "macOS",
-  "settings.appearance.titlebar.note": "Примечание: Для изменения стиля заголовка на нативный требуется перезапуск приложения."
+  "settings.appearance.titlebar.note": "Примечание: Для изменения стиля заголовка на нативный требуется перезапуск приложения.",
+  "settings.appearance.advanced_settings": "Расширенные настройки",
+  "settings.appearance.advanced_settings.description": "Настройте расширенные визуальные параметры для вашего устройства.",
+  "settings.appearance.advanced_rendering": "Расширенный рендеринг",
+  "settings.appearance.toggle_advanced_rendering": "Переключить расширенный рендеринг",
+  "settings.appearance.advanced_rendering_desc": "Включить/отключить более плавные анимации и визуальные эффекты во всём приложении."
 } 

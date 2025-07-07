@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import SettingsSidebar from './SettingsSidebar';
 import AppearanceSettings from './AppearanceSettings';
 import PrivacySettings from './PrivacySettings';
@@ -21,7 +21,9 @@ interface SettingsModalProps {
   selectedTitlebarStyle: string;
   handleThemeChange: (theme: string) => void;
   handleTitlebarStyleChange: (style: string) => void;
+  handleAdvancedRenderingToggle: () => void;
   t: (key: string, defaultValue?: string) => string;
+  advancedRendering: boolean;
 }
 
 const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -35,25 +37,70 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   selectedTitlebarStyle,
   handleThemeChange,
   handleTitlebarStyleChange,
-  t
+  handleAdvancedRenderingToggle,
+  t,
+  advancedRendering = true // Default to true if not provided
 }) => {
-  if (!showSettings) return null;
+  // Animation state
+  const [isVisible, setIsVisible] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  
+  // Handle modal open/close
+  useEffect(() => {
+    if (showSettings) {
+      setIsVisible(true);
+      setIsClosing(false);
+    } else if (isVisible) {
+      // If the modal was visible but showSettings became false, start closing animation
+      setIsClosing(true);
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+        setIsClosing(false);
+      }, advancedRendering ? 300 : 0); // Instant hide for non-advanced rendering
+      return () => clearTimeout(timer);
+    }
+  }, [showSettings, isVisible, advancedRendering]);
+  
+  // Handle close action
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setShowSettings(false);
+    }, advancedRendering ? 300 : 0); // Instant hide for non-advanced rendering
+  };
+  
+  // If modal shouldn't be shown and no closing animation is active, render nothing
+  if (!isVisible && !showSettings) return null;
+  
+  // Determine animation classes based on advanced rendering setting
+  const backdropClass = advancedRendering
+    ? isClosing ? 'modal-backdrop-exit' : 'modal-backdrop'
+    : isClosing ? 'modal-basic-exit' : 'modal-basic-enter';
+    
+  const contentClass = advancedRendering
+    ? isClosing ? 'modal-content-exit' : 'modal-content'
+    : '';
+    
+  const backdropStyle = { backgroundColor: 'rgba(20, 17, 0, 0.55)' };
+  
+  const contentStyle = advancedRendering 
+    ? {} 
+    : { transform: 'translate(-50%, -50%)' };
   
   return (
     <>
-      {/* Backdrop with blur effect with strong filters to ensure blur works */}
+      {/* Backdrop with blur effect */}
       <div 
-        className="fixed inset-0 z-40"
-        style={{
-          backdropFilter: 'blur(6px)',
-          WebkitBackdropFilter: 'blur(6px)',
-          backgroundColor: 'rgba(20, 17, 0, 0.55)'
-        }}
-        onClick={() => setShowSettings(false)}
+        className={`fixed inset-0 z-40 ${backdropClass}`}
+        style={backdropStyle}
+        onClick={handleClose}
       ></div>
       
-      {/* Modal Content */}
-      <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[550px] ${themeClasses.secondaryBackground} rounded-2xl shadow-xl z-50 overflow-hidden border ${themeClasses.border} flex flex-col`}>
+      {/* Modal content */}
+      <div 
+        className={`fixed top-1/2 left-1/2 w-[800px] h-[550px] ${themeClasses.secondaryBackground} rounded-2xl shadow-xl z-50 overflow-hidden border ${themeClasses.border} flex flex-col ${contentClass}`}
+        style={contentStyle}
+      >
         {/* Modal Titlebar */}
         <div className={`h-[60px] w-full ${themeClasses.secondaryBackground} px-4 flex items-center justify-between border-b ${themeClasses.border}`}>
           <div className="flex items-center">
@@ -68,8 +115,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           
           {/* Close button */}
           <button 
-            className={`w-10 h-10 flex items-center justify-center rounded-full hover:bg-[var(--bg-card)] transition-colors ${themeClasses.secondaryText} hover:${themeClasses.text}`}
-            onClick={() => setShowSettings(false)}
+            className="w-10 h-10 flex items-center justify-center rounded-full transition-all text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] hover-effect-modal no-drag"
+            onClick={handleClose}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" />
@@ -91,7 +138,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           
           {/* Right Content Area */}
           <div className={`flex-1 ${themeClasses.secondaryBackground} relative`}>
-            {/* Vertical separator line - делаем более заметным */}
+            {/* Vertical separator line */}
             <div className={`absolute left-0 top-[8%] bottom-[8%] w-[2px] bg-[var(--border-color)] opacity-70`}></div>
             
             {/* Content for the active tab */}
@@ -103,6 +150,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                   selectedTitlebarStyle={selectedTitlebarStyle}
                   handleThemeChange={handleThemeChange}
                   handleTitlebarStyleChange={handleTitlebarStyleChange}
+                  handleAdvancedRenderingToggle={handleAdvancedRenderingToggle}
+                  advancedRendering={advancedRendering}
                   t={t}
                 />
               )}

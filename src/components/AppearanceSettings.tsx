@@ -14,6 +14,8 @@ interface AppearanceSettingsProps {
   selectedTitlebarStyle: string;
   handleThemeChange: (theme: string) => void;
   handleTitlebarStyleChange: (style: string) => void;
+  handleAdvancedRenderingToggle?: () => void;
+  advancedRendering?: boolean;
   t: (key: string, defaultValue?: string) => string;
 }
 
@@ -23,6 +25,8 @@ const AppearanceSettings: React.FC<AppearanceSettingsProps> = ({
   selectedTitlebarStyle,
   handleThemeChange,
   handleTitlebarStyleChange,
+  handleAdvancedRenderingToggle,
+  advancedRendering,
   t
 }) => {
   return (
@@ -136,7 +140,7 @@ const AppearanceSettings: React.FC<AppearanceSettingsProps> = ({
       <p className={`${themeClasses.secondaryText} text-sm mb-5`}>{t('settings.appearance.titlebar_style.description', 'Choose how the application window titlebar should look.')}</p>
       
       {/* Titlebar style selector grid */}
-      <div className="grid grid-cols-3 gap-4 max-w-md">
+      <div className="grid grid-cols-2 gap-4 max-w-md">
         {/* Custom titlebar (current style) */}
         <ThemeCard
           theme="custom"
@@ -206,36 +210,58 @@ const AppearanceSettings: React.FC<AppearanceSettingsProps> = ({
             </div>
           }
         />
-        
-        {/* macOS style titlebar */}
-        <ThemeCard
-          theme="macos"
-          selectedTheme={selectedTitlebarStyle}
-          title="macOS"
-          themeClasses={themeClasses}
-          t={(key, defaultValue) => {
-            // Adjust the key for titlebar styles
-            const adjustedKey = key.replace('theme', 'titlebar');
-            return t(adjustedKey, defaultValue);
-          }}
-          onClick={() => handleTitlebarStyleChange('macos')}
-          previewContent={
-            <div className={`${themeClasses.secondaryBackground} p-2 rounded-t-2xl mb-0 h-[50px] relative overflow-hidden border-b ${themeClasses.border} flex items-center justify-center`}>
-              {/* Traffic light controls */}
-              <div className="flex space-x-2">
-                <div className="w-3 h-3 rounded-full bg-[#ff5f57]"></div>
-                <div className="w-3 h-3 rounded-full bg-[#febc2e]"></div>
-                <div className="w-3 h-3 rounded-full bg-[#28c840]"></div>
-              </div>
-            </div>
-          }
-        />
       </div>
       
       {/* Note about restart */}
       <p className={`${themeClasses.secondaryText} text-sm mt-3 italic`}>
         {t('settings.appearance.titlebar.note', 'Note: Changing the titlebar style requires restarting the application.')}
       </p>
+      
+      {/* Advanced Rendering Section */}
+      <h3 className={`text-xl ${themeClasses.text} font-medium mb-2 mt-10`}>{t('settings.appearance.advanced_settings', 'Advanced Settings')}</h3>
+      <p className={`${themeClasses.secondaryText} text-sm mb-5`}>{t('settings.appearance.advanced_settings.description', 'Configure advanced visual settings for your device.')}</p>
+      
+      <div className="space-y-4 max-w-md">
+        {/* Advanced rendering card */}
+        <div className={`p-4 rounded-2xl ${themeClasses.cardBackground} border ${themeClasses.border} shadow-sm`}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`${themeClasses.text} mr-2`}>
+                <circle cx="12" cy="12" r="10"></circle>
+                <circle cx="12" cy="12" r="4"></circle>
+                <line x1="4.93" y1="4.93" x2="9.17" y2="9.17"></line>
+                <line x1="14.83" y1="14.83" x2="19.07" y2="19.07"></line>
+                <line x1="14.83" y1="9.17" x2="19.07" y2="4.93"></line>
+                <line x1="14.83" y1="9.17" x2="18.36" y2="5.64"></line>
+                <line x1="4.93" y1="19.07" x2="9.17" y2="14.83"></line>
+              </svg>
+              <h3 className={`font-medium ${themeClasses.text}`}>{t('settings.appearance.advanced_rendering', 'Advanced Rendering')}</h3>
+            </div>
+            <div className="relative">
+              <button
+                onClick={handleAdvancedRenderingToggle}
+                className={`w-12 h-6 rounded-full ${
+                  advancedRendering ? 'bg-green-500' : 'bg-gray-400'
+                } transition-colors duration-200 focus:outline-none`}
+                aria-label={t('settings.appearance.toggle_advanced_rendering', 'Toggle advanced rendering')}
+              >
+                <span
+                  className={`block w-4 h-4 bg-white rounded-full transition-transform duration-200 ${
+                    advancedRendering ? 'translate-x-7' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
+          
+          <div className="space-y-3">
+            <p className={`text-sm ${themeClasses.secondaryText}`}>
+              {t('settings.appearance.advanced_rendering_desc', 'Enable smoother animations and visual effects throughout the application.')}
+            </p>
+            
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

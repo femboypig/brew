@@ -50,7 +50,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       {/* Settings button - positioned with mathematical calculation */}
       <div className="w-full flex mb-12 relative">
         <button 
-          className={`w-12 h-12 flex items-center justify-center hover:bg-[var(--bg-card)] hover:shadow-md active:scale-95 active:translate-y-[1px] ${themeClasses.secondaryText} hover:${themeClasses.text} rounded-full transition-all absolute`}
+          className="w-12 h-12 flex items-center justify-center hover-effect hover:shadow-md active:scale-95 active:translate-y-[1px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-full transition-all absolute"
           style={{ left: `${buttonLeftPosition}px` }}
           onClick={onSettingsClick}
           onMouseEnter={handleMouseEnter}

@@ -50,7 +50,7 @@ const MainContent: React.FC<MainContentProps> = ({
       }}
     >
       <main
-        className={`w-full h-full ${themeClasses.background} rounded-tl-[24px] p-4 ${themeClasses.text} overflow-auto border-t border-l ${themeClasses.border} relative`}
+        className={`w-full h-full ${themeClasses.background} rounded-tl-[24px] p-4 ${themeClasses.text} overflow-auto border-t border-l ${themeClasses.border} relative custom-scrollbar`}
         style={{
           boxShadow: 'inset 0 4px 8px -2px rgba(0,0,0,0.10), inset 4px 0 8px -2px rgba(0,0,0,0.10)'
         }}

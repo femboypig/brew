@@ -39,6 +39,9 @@ function App() {
   const overlapAmount = 9; // Reduced by 1px for more precise positioning
   const bottomPadding = 25; // Padding to avoid overlap at the bottom
   
+  // Add state for advanced rendering
+  const [advancedRendering, setAdvancedRendering] = useState(true);
+  
   // Функция для перевода текста с использованием загруженных переводов
   const t = (key: string, defaultValue?: string): string => {
     return translations[key] || defaultValue || key;
@@ -62,14 +65,14 @@ function App() {
     setTooltip(null);
   };
   
-  // Загрузка системной информации и настроек при старте
+  // Load system information and settings at startup
   useEffect(() => {
     const loadSystemAndSettings = async () => {
       try {
         // Start with some basic progress to indicate initialization
         setLoadingProgress(10);
         
-        // Получение системной информации из Rust
+        // Get system information from Rust
         const sysInfo: any = await invoke('get_system_info');
         setSystemInfo({
           os: sysInfo.os,
@@ -78,15 +81,16 @@ function App() {
         
         setLoadingProgress(40);
         
-        // Загрузка настроек из Rust
+        // Load settings from Rust
         try {
           const settings: Settings = await invoke('get_settings');
-          // Обновляем состояние из полученных настроек
+          // Update state from received settings
           if (settings) {
             setSelectedTheme(settings.theme);
             setDiscordRpcEnabled(settings.discord_rpc);
             setCurrentLanguage(settings.language);
-            // Устанавливаем стиль тайтлбара, если он есть в настройках, иначе используем 'custom' по умолчанию
+            setAdvancedRendering(settings.advanced_rendering);
+            // Set titlebar style if available in settings, otherwise use 'custom' by default
             setSelectedTitlebarStyle(settings.titlebar_style || 'custom');
             
             // Apply theme immediately from the settings instead of using state
@@ -96,7 +100,7 @@ function App() {
           setLoadingProgress(70);
         } catch (e) {
           console.error('Failed to load settings:', e);
-          // Используем значения по умолчанию и создаем файл настроек
+          // Use default values and create settings file
           const defaultTheme = 'system';
           updateSettings({
             theme: defaultTheme,
@@ -105,6 +109,9 @@ function App() {
             language: 'en_US',
             titlebar_style: 'custom'
           });
+          
+          // Set default state values
+          setAdvancedRendering(true);
           
           // Apply default theme immediately
           applyTheme(defaultTheme);
@@ -123,7 +130,7 @@ function App() {
     loadSystemAndSettings();
   }, []);
   
-  // Функция для сохранения настроек через Rust-бэкенд
+  // Function to save settings through Rust backend
   const updateSettings = async (settings: Settings) => {
     try {
       await invoke('update_settings', { settings });
@@ -132,41 +139,54 @@ function App() {
     }
   };
   
-  // Обработка изменения темы
+  // Handle theme change
   const handleThemeChange = (theme: string) => {
     setSelectedTheme(theme);
     updateSettings({
       theme,
       discord_rpc: discordRpcEnabled,
-      advanced_rendering: true,
+      advanced_rendering: advancedRendering,
       language: currentLanguage,
       titlebar_style: selectedTitlebarStyle
     });
     
-    // Применить тему к документу
+    // Apply theme to document
     applyTheme(theme);
   };
   
-  // Обработка переключения Discord RPC
+  // Handle Discord RPC toggle
   const handleDiscordRpcToggle = () => {
     const newValue = !discordRpcEnabled;
     setDiscordRpcEnabled(newValue);
     updateSettings({
       theme: selectedTheme,
       discord_rpc: newValue,
-      advanced_rendering: true,
+      advanced_rendering: advancedRendering,
       language: currentLanguage,
       titlebar_style: selectedTitlebarStyle
     });
   };
   
-  // Обработка изменения стиля тайтлбара
+  // Handle Advanced Rendering toggle
+  const handleAdvancedRenderingToggle = () => {
+    const newValue = !advancedRendering;
+    setAdvancedRendering(newValue);
+    updateSettings({
+      theme: selectedTheme,
+      discord_rpc: discordRpcEnabled,
+      advanced_rendering: newValue,
+      language: currentLanguage,
+      titlebar_style: selectedTitlebarStyle
+    });
+  };
+  
+  // Handle titlebar style change
   const handleTitlebarStyleChange = (style: string) => {
     setSelectedTitlebarStyle(style);
     updateSettings({
       theme: selectedTheme,
       discord_rpc: discordRpcEnabled,
-      advanced_rendering: true,
+      advanced_rendering: advancedRendering,
       language: currentLanguage,
       titlebar_style: style
     });
@@ -272,6 +292,11 @@ function App() {
   
   const themeClasses = getThemeClasses();
   
+  // Apply advanced rendering attribute to body
+  useEffect(() => {
+    document.body.setAttribute('data-advanced-rendering', advancedRendering.toString());
+  }, [advancedRendering]);
+  
   // Show splash screen while loading
   if (isLoading) {
     return <SplashScreen 
@@ -327,7 +352,9 @@ function App() {
         selectedTitlebarStyle={selectedTitlebarStyle}
         handleThemeChange={handleThemeChange}
         handleTitlebarStyleChange={handleTitlebarStyleChange}
+        handleAdvancedRenderingToggle={handleAdvancedRenderingToggle}
         t={t}
+        advancedRendering={advancedRendering}
       />
     </div>
   );

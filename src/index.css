@@ -36,4 +36,242 @@
 
 .fade-in {
   animation: fadeIn 0.5s ease-in-out forwards;
+}
+
+/* Modal and blur animations */
+@keyframes fadeInBlur {
+  from { 
+    opacity: 0; 
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+  to { 
+    opacity: 1; 
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+}
+
+@keyframes fadeOutBlur {
+  from { 
+    opacity: 1; 
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  to { 
+    opacity: 0; 
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+}
+
+@keyframes scaleIn {
+  from { 
+    opacity: 0; 
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to { 
+    opacity: 1; 
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes scaleOut {
+  from { 
+    opacity: 1; 
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to { 
+    opacity: 0; 
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+}
+
+/* Basic animation classes */
+.modal-backdrop {
+  animation: fadeInBlur 0.3s ease-out forwards;
+}
+
+.modal-backdrop-exit {
+  animation: fadeOutBlur 0.3s ease-out forwards;
+}
+
+.modal-content {
+  animation: scaleIn 0.3s ease-out forwards;
+}
+
+.modal-content-exit {
+  animation: scaleOut 0.3s ease-out forwards;
+}
+
+/* Animation classes for advanced rendering disabled */
+.modal-basic-enter {
+  opacity: 1;
+  background-color: rgba(20, 17, 0, 0.55);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.modal-basic-exit {
+  opacity: 0;
+  background-color: rgba(20, 17, 0, 0.55);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* Custom scrollbar styles for all platforms */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+  margin: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.5);
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 128, 128, 0.7);
+}
+
+/* Custom scrollbar style for main content */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+  display: block;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(128, 128, 128, 0.5);
+  border: 3px solid transparent;
+  border-radius: 10px;
+  background-clip: padding-box;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(128, 128, 128, 0.7);
+}
+
+/* Button styles in settings */
+.hover-effect {
+  transition: all 0.2s ease;
+}
+
+.hover-effect:hover {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+}
+
+/* Special class for sidebar buttons without scaling effects */
+.sidebar-button:hover {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+}
+
+/* Special styles for cards */
+button.hover-effect:hover,
+div.hover-effect:hover {
+  background-color: var(--bg-card);
+}
+
+/* Style for app close button */
+.hover-effect-close:hover {
+  background-color: #ff0000 !important;
+  color: white !important;
+}
+
+.hover-effect-close:active {
+  background-color: #cc0000 !important;
+}
+
+/* Style for settings close button */
+.hover-effect-modal:hover {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Force Touch support for macOS */
+@media (hover: hover) and (-webkit-touch-callout: none) {
+  body[data-advanced-rendering="true"] .hover-effect:active {
+    transform: scale(0.95);
+  }
+  
+  body[data-advanced-rendering="true"] .hover-effect-close:active {
+    transform: scale(0.95);
+  }
+  
+  body[data-advanced-rendering="true"] .hover-effect-modal:active {
+    transform: scale(0.95);
+  }
+  
+  /* Do NOT apply transformation to sidebar buttons */
+  .sidebar-button:active {
+    transform: none;
+  }
+  
+  body[data-advanced-rendering="true"] .mac-button:active .mac-icon {
+    opacity: 1;
+  }
+}
+
+/* macOS traffic light buttons */
+.mac-button .mac-icon {
+  opacity: 0;
+  transition: opacity 0.15s ease-out;
+}
+
+.mac-button:hover .mac-icon {
+  opacity: 1;
+}
+
+/* Специфичные стили для macOS */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  .mac-button .mac-icon {
+    opacity: 0 !important;
+  }
+  
+  .mac-button:hover .mac-icon {
+    opacity: 1 !important;
+  }
+  
+  .hover-effect:hover {
+    background-color: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+  }
+  
+  button:hover .icon-visible {
+    opacity: 1 !important;
+  }
+}
+
+/* Специфичные стили для Safari */
+@supports (-webkit-touch-callout: none) {
+  .mac-button .mac-icon {
+    transition: opacity 0.15s ease-out;
+  }
+  
+  .mac-button:hover .mac-icon {
+    opacity: 1 !important;
+  }
+  
+  .hover-effect {
+    transition: all 0.15s ease-out;
+  }
+  
+  .hover-effect:hover {
+    background-color: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+  }
 } 

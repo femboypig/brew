@@ -30,9 +30,9 @@ const ThemeCard: React.FC<ThemeCardProps> = ({
 }) => {
   return (
     <div 
-      className={`rounded-2xl p-1 cursor-pointer border transition-colors duration-200 ${selectedTheme === theme 
+      className={`rounded-2xl p-1 cursor-pointer border transition-all duration-200 hover-effect ${selectedTheme === theme 
         ? 'border-[#ffcc40] shadow-md' 
-        : `border-[var(--border-color)]`}`}
+        : `border-[var(--border-color)] hover:border-gray-400 hover:shadow-sm`}`}
       style={{
         backgroundColor: themeClasses.secondaryBackground.includes('bg-[var(--bg-secondary)]') 
           ? 'var(--bg-secondary)' 

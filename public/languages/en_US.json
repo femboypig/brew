@@ -23,6 +23,12 @@
   "settings.appearance.titlebar_style.description": "Choose how the application window titlebar should look.",
   "settings.appearance.titlebar.custom": "Custom",
   "settings.appearance.titlebar.native": "Native",
-  "settings.appearance.titlebar.macos": "macOS",
-  "settings.appearance.titlebar.note": "Note: Changing the titlebar style to native requires restarting the application."
+  "settings.appearance.titlebar.note": "Note: Changing the titlebar style to native requires restarting the application.",
+  "settings.appearance.advanced_settings": "Advanced Settings",
+  "settings.appearance.advanced_settings.description": "Configure advanced visual settings for your device.",
+  "settings.appearance.advanced_rendering": "Advanced Rendering",
+  "settings.appearance.toggle_advanced_rendering": "Toggle advanced rendering",
+  "settings.appearance.advanced_rendering_desc": "Enable/Disable smoother animations and visual effects throughout the application.",
+  "settings.appearance.advanced_rendering_on_note": "Advanced rendering is enabled. This may use more system resources.",
+  "settings.appearance.advanced_rendering_off_note": "Advanced rendering is disabled. This may improve performance on older devices."
 } 
