@@ -1,4 +1,4 @@
-# brew 🏴‍☠️
+# Intelligence 🏴‍☠️
 
 A modern, fast and user-friendly Minecraft launcher focused on pirated minecraft.
 

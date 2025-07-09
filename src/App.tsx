@@ -28,25 +28,25 @@ function App() {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [currentLanguage, setCurrentLanguage] = useState<string>('en_US');
   const [availableLanguages, setAvailableLanguages] = useState<any[]>([]);
-  const [translations, setTranslations] = useState<{[key: string]: string}>({});
-  
+  const [translations, setTranslations] = useState<{ [key: string]: string }>({});
+
   // Состояние для тултипов
   const [tooltip, setTooltip] = useState<TooltipData | null>(null);
-  
+
   // Define exact dimensions for precise calculations
   const titlebarHeight = 55;
   const sidebarWidth = 70;
   const overlapAmount = 9; // Reduced by 1px for more precise positioning
   const bottomPadding = 25; // Padding to avoid overlap at the bottom
-  
+
   // Add state for advanced rendering
   const [advancedRendering, setAdvancedRendering] = useState(true);
-  
+
   // Функция для перевода текста с использованием загруженных переводов
   const t = (key: string, defaultValue?: string): string => {
     return translations[key] || defaultValue || key;
   };
-  
+
   // Функция для показа тултипа с задержкой
   const showTooltipWithDelay = (text: string, position: { top: number, left?: number }) => {
     const timer = setTimeout(() => {
@@ -56,31 +56,31 @@ function App() {
         position
       });
     }, 250); // 250ms задержка
-    
+
     return () => clearTimeout(timer);
   };
-  
+
   // Функция для скрытия тултипа
   const hideTooltip = () => {
     setTooltip(null);
   };
-  
+
   // Load system information and settings at startup
   useEffect(() => {
     const loadSystemAndSettings = async () => {
       try {
         // Start with some basic progress to indicate initialization
         setLoadingProgress(10);
-        
+
         // Get system information from Rust
         const sysInfo: any = await invoke('get_system_info');
         setSystemInfo({
           os: sysInfo.os,
           version: sysInfo.version
         });
-        
+
         setLoadingProgress(40);
-        
+
         // Load settings from Rust
         try {
           const settings: Settings = await invoke('get_settings');
@@ -92,7 +92,7 @@ function App() {
             setAdvancedRendering(settings.advanced_rendering);
             // Set titlebar style if available in settings, otherwise use 'custom' by default
             setSelectedTitlebarStyle(settings.titlebar_style || 'custom');
-            
+
             // Apply theme immediately from the settings instead of using state
             // This ensures the correct theme is applied without waiting for React state updates
             applyTheme(settings.theme);
@@ -109,15 +109,15 @@ function App() {
             language: 'en_US',
             titlebar_style: 'custom'
           });
-          
+
           // Set default state values
           setAdvancedRendering(true);
-          
+
           // Apply default theme immediately
           applyTheme(defaultTheme);
           setLoadingProgress(70);
         }
-        
+
         // Finalize loading
         setLoadingProgress(100);
       } catch (error) {
@@ -126,10 +126,10 @@ function App() {
         setLoadingProgress(100);
       }
     };
-    
+
     loadSystemAndSettings();
   }, []);
-  
+
   // Function to save settings through Rust backend
   const updateSettings = async (settings: Settings) => {
     try {
@@ -138,7 +138,7 @@ function App() {
       console.error('Failed to save settings:', error);
     }
   };
-  
+
   // Handle theme change
   const handleThemeChange = (theme: string) => {
     setSelectedTheme(theme);
@@ -149,11 +149,11 @@ function App() {
       language: currentLanguage,
       titlebar_style: selectedTitlebarStyle
     });
-    
+
     // Apply theme to document
     applyTheme(theme);
   };
-  
+
   // Handle Discord RPC toggle
   const handleDiscordRpcToggle = () => {
     const newValue = !discordRpcEnabled;
@@ -166,7 +166,7 @@ function App() {
       titlebar_style: selectedTitlebarStyle
     });
   };
-  
+
   // Handle Advanced Rendering toggle
   const handleAdvancedRenderingToggle = () => {
     const newValue = !advancedRendering;
@@ -179,7 +179,7 @@ function App() {
       titlebar_style: selectedTitlebarStyle
     });
   };
-  
+
   // Handle titlebar style change
   const handleTitlebarStyleChange = (style: string) => {
     setSelectedTitlebarStyle(style);
@@ -191,14 +191,14 @@ function App() {
       titlebar_style: style
     });
   };
-  
+
   // Function to apply theme
   const applyTheme = (theme: string) => {
     document.documentElement.setAttribute('data-theme', theme);
-    
+
     // Save theme preference to localStorage for persistent experience
-    localStorage.setItem('brew-theme', theme);
-    
+    localStorage.setItem('intelligence-theme', theme);
+
     // Add theme-specific CSS variables
     const root = document.documentElement;
     if (theme === 'dark') {
@@ -208,6 +208,8 @@ function App() {
       root.style.setProperty('--text-primary', '#ffffff');
       root.style.setProperty('--text-secondary', '#a0a0a0');
       root.style.setProperty('--border-color', '#333333');
+      // Set dark mode attribute for custom styles
+      root.setAttribute('data-dark-mode', 'true');
     } else if (theme === 'light') {
       root.style.setProperty('--bg-primary', '#ffffff');
       root.style.setProperty('--bg-secondary', '#f8f8f8');
@@ -215,6 +217,8 @@ function App() {
       root.style.setProperty('--text-primary', '#000000');
       root.style.setProperty('--text-secondary', '#505050');
       root.style.setProperty('--border-color', '#e0e0e0');
+      // Remove dark mode attribute
+      root.removeAttribute('data-dark-mode');
     } else if (theme === 'oled') {
       root.style.setProperty('--bg-primary', '#000000');
       root.style.setProperty('--bg-secondary', '#0a0a0a');
@@ -222,10 +226,12 @@ function App() {
       root.style.setProperty('--text-primary', '#ffffff');
       root.style.setProperty('--text-secondary', '#a0a0a0');
       root.style.setProperty('--border-color', '#222222');
+      // Set dark mode attribute for custom styles
+      root.setAttribute('data-dark-mode', 'true');
     } else if (theme === 'system') {
       // Remove from localStorage to use system preference
-      localStorage.removeItem('brew-theme');
-      
+      localStorage.removeItem('intelligence-theme');
+
       // Use system theme if available, fallback to dark
       if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         root.style.setProperty('--bg-primary', '#0a0a0a');
@@ -234,6 +240,8 @@ function App() {
         root.style.setProperty('--text-primary', '#ffffff');
         root.style.setProperty('--text-secondary', '#a0a0a0');
         root.style.setProperty('--border-color', '#333333');
+        // Set dark mode attribute for custom styles
+        root.setAttribute('data-dark-mode', 'true');
       } else {
         root.style.setProperty('--bg-primary', '#ffffff');
         root.style.setProperty('--bg-secondary', '#f8f8f8');
@@ -241,10 +249,12 @@ function App() {
         root.style.setProperty('--text-primary', '#000000');
         root.style.setProperty('--text-secondary', '#505050');
         root.style.setProperty('--border-color', '#e0e0e0');
+        // Remove dark mode attribute
+        root.removeAttribute('data-dark-mode');
       }
     }
   };
-  
+
   // Listen for system theme changes if system theme is selected
   useEffect(() => {
     if (selectedTheme === 'system') {
@@ -259,6 +269,8 @@ function App() {
           root.style.setProperty('--text-primary', '#ffffff');
           root.style.setProperty('--text-secondary', '#a0a0a0');
           root.style.setProperty('--border-color', '#333333');
+          // Set dark mode attribute for custom styles
+          root.setAttribute('data-dark-mode', 'true');
         } else {
           // Light mode
           const root = document.documentElement;
@@ -268,9 +280,11 @@ function App() {
           root.style.setProperty('--text-primary', '#000000');
           root.style.setProperty('--text-secondary', '#505050');
           root.style.setProperty('--border-color', '#e0e0e0');
+          // Remove dark mode attribute
+          root.removeAttribute('data-dark-mode');
         }
       };
-      
+
       mediaQuery.addEventListener('change', handleChange);
       return () => mediaQuery.removeEventListener('change', handleChange);
     }
@@ -286,20 +300,20 @@ function App() {
       secondaryText: 'text-[var(--text-secondary)]',
       border: 'border-[var(--border-color)]'
     };
-    
+
     return themeClasses;
   };
-  
+
   const themeClasses = getThemeClasses();
-  
+
   // Apply advanced rendering attribute to body
   useEffect(() => {
     document.body.setAttribute('data-advanced-rendering', advancedRendering.toString());
   }, [advancedRendering]);
-  
+
   // Show splash screen while loading
   if (isLoading) {
-    return <SplashScreen 
+    return <SplashScreen
       onInitialized={() => setIsLoading(false)}
       progress={loadingProgress}
       onLanguageLoaded={(loadedTranslations) => setTranslations(loadedTranslations)}
@@ -313,6 +327,7 @@ function App() {
         selectedTitlebarStyle={selectedTitlebarStyle}
         t={t}
         themeClasses={themeClasses}
+        selectedTheme={selectedTheme}
       />
 
       {/* Layout Container */}
@@ -339,7 +354,7 @@ function App() {
           selectedTheme={selectedTheme}
         />
       </div>
-      
+
       {/* Settings Modal Component */}
       <SettingsModal
         themeClasses={themeClasses}

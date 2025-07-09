@@ -57,20 +57,20 @@ struct AppState {
 // Function to get the settings directory path based on OS
 fn get_settings_path(_app_handle: &AppHandle) -> Result<PathBuf, Box<dyn Error>> {
     let path = if cfg!(target_os = "linux") {
-        // Linux: ~/.brew-app
+        // Linux: ~/.intelligence-app
         let home = dirs::home_dir()
             .ok_or_else(|| "Could not find home directory")?;
-        home.join(".brew-app")
+        home.join(".intelligence-app")
     } else if cfg!(target_os = "macos") {
-        // macOS: ~/Library/Application Support/brew-app
+        // macOS: ~/Library/Application Support/intelligence-app
         let home = dirs::home_dir()
             .ok_or_else(|| "Could not find home directory")?;
-        home.join("Library/Application Support/brew-app")
+        home.join("Library/Application Support/intelligence-app")
     } else {
         // Windows or fallback
         let home = dirs::config_dir()
             .ok_or_else(|| "Could not find config directory")?;
-        home.join("brew-app")
+        home.join("intelligence-app")
     };
 
     // Create directory if it doesn't exist
@@ -221,24 +221,24 @@ fn create_default_language() -> Result<Language, Box<dyn Error>> {
         metadata: LanguageMetadata {
             id: "en_US".to_string(),
             version: "1.0.0".to_string(),
-            author: "brew team".to_string(),
+            author: "Intelligence team".to_string(),
         },
         translations: [
-            ("app.title".to_string(), "brew".to_string()),
+            ("app.title".to_string(), "Intelligence".to_string()),
             ("app.status.no_instances".to_string(), "No instances running".to_string()),
             ("settings.title".to_string(), "Settings".to_string()),
             ("settings.tab.appearance".to_string(), "Appearance".to_string()),
             ("settings.tab.privacy".to_string(), "Privacy".to_string()),
             ("settings.appearance.color_theme".to_string(), "Color theme".to_string()),
-            ("settings.appearance.color_theme.description".to_string(), "Select your preferred color theme for Modrinth App.".to_string()),
+            ("settings.appearance.color_theme.description".to_string(), "Select your preferred color theme for Intelligence App.".to_string()),
             ("settings.appearance.theme.dark".to_string(), "Dark".to_string()),
             ("settings.appearance.theme.light".to_string(), "Light".to_string()),
             ("settings.appearance.theme.oled".to_string(), "OLED".to_string()),
             ("settings.appearance.theme.sync".to_string(), "Sync".to_string()),
             ("settings.privacy.discord_rpc".to_string(), "Discord RPC".to_string()),
-            ("settings.privacy.discord_rpc.description".to_string(), "Manages the Discord Rich Presence integration. Disabling this will cause 'Modrinth' to no longer show up as a game or app you are using on your Discord profile.".to_string()),
+            ("settings.privacy.discord_rpc.description".to_string(), "Manages the Discord Rich Presence integration. Disabling this will cause 'Intelligence' to no longer show up as a game or app you are using on your Discord profile.".to_string()),
             ("settings.privacy.discord_rpc.note".to_string(), "Note: This will not prevent any instance-specific Discord Rich Presence integrations, such as those added by mods. (app restart required to take effect)".to_string()),
-            // New translations for titlebar styles <brew app v0.0.5>
+            // New translations for titlebar styles <Intelligence app v0.0.5>
             ("settings.appearance.titlebar_style".to_string(), "Titlebar Style".to_string()),
             ("settings.appearance.titlebar_style.description".to_string(), "Choose how the application window titlebar should look.".to_string()),
             ("settings.appearance.titlebar.custom".to_string(), "Custom".to_string()),
@@ -325,7 +325,7 @@ async fn get_available_languages(app_handle: AppHandle) -> Result<Vec<LanguageMe
         languages.push(LanguageMetadata {
             id: "en_US".to_string(),
             version: "1.0.0".to_string(),
-            author: "brew team".to_string(),
+            author: "Intelligence team".to_string(),
         });
     }
     

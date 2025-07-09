@@ -18,16 +18,16 @@ const Tooltip: React.FC<TooltipProps> = ({ text, show, position, themeClasses, t
       const timer = setTimeout(() => {
         setIsVisible(true);
       }, 250);
-      
+
       return () => clearTimeout(timer);
     } else {
       setIsVisible(false);
     }
   }, [show]);
-  
+
   // Определяем дополнительные стили в зависимости от темы
   const getThemeSpecificStyles = () => {
-    switch(theme) {
+    switch (theme) {
       case 'dark':
         return {
           backgroundColor: 'var(--bg-card, #27272a)',
@@ -60,9 +60,9 @@ const Tooltip: React.FC<TooltipProps> = ({ text, show, position, themeClasses, t
   };
 
   const themeStyles = getThemeSpecificStyles();
-  
+
   if (!isVisible) return null;
-  
+
   return (
     <div
       className={`fixed z-50 px-3 py-1.5 rounded-2xl text-sm font-medium border ${themeClasses.text}`}
@@ -89,7 +89,7 @@ const Tooltip: React.FC<TooltipProps> = ({ text, show, position, themeClasses, t
           top: '50%'
         }}
       ></div>
-      
+
       {/* Контент тултипа */}
       {text}
     </div>

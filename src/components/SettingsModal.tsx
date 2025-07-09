@@ -134,6 +134,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             setActiveSettingsTab={setActiveSettingsTab}
             systemInfo={systemInfo}
             t={t}
+            selectedTheme={selectedTheme}
           />
           
           {/* Right Content Area */}

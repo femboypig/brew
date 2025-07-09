@@ -1,6 +1,6 @@
-# Contributing to Brew
+# Contributing to Intelligence
 
-Thank you for your interest in contributing to brew! This document provides guidelines and instructions for contributing to this project.
+Thank you for your interest in contributing to Intelligence! This document provides guidelines and instructions for contributing to this project.
 
 ## Code of Conduct
 

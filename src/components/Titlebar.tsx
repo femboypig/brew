@@ -1,5 +1,6 @@
 import { Window } from '@tauri-apps/api/window';
-import appIcon from '../assets/beer.svg';
+import { useRotatingThemeIcon } from '../utils/themeUtils';
+import { useEffect, useState } from 'react';
 
 interface TitlebarProps {
   selectedTitlebarStyle: string;
@@ -12,13 +13,15 @@ interface TitlebarProps {
     secondaryText: string;
     border: string;
   };
+  selectedTheme: string;
 }
 
-const Titlebar = ({ selectedTitlebarStyle, t, themeClasses }: TitlebarProps) => {
+const Titlebar = ({ selectedTitlebarStyle, t, themeClasses, selectedTheme }: TitlebarProps) => {
   const appWindow = Window.getCurrent();
-  
+  const { containerProps, frontIconProps, backIconProps } = useRotatingThemeIcon(selectedTheme);
+
   return (
-    <div 
+    <div
       className={`w-full h-[55px] ${themeClasses.secondaryBackground} fixed top-0 left-0 right-0 flex items-center justify-between border-b ${themeClasses.border} z-10`}
       data-tauri-drag-region
     >
@@ -28,49 +31,57 @@ const Titlebar = ({ selectedTitlebarStyle, t, themeClasses }: TitlebarProps) => 
           <>
             {/* macOS style traffic light controls */}
             <div className="flex items-center ml-3 space-x-2 mr-3">
-              <button 
+              <button
                 className="w-3.5 h-3.5 rounded-full bg-[#ff5f57] hover:bg-[#ff5f57] hover:brightness-110 active:brightness-90 no-drag flex items-center justify-center mac-button"
                 onClick={() => appWindow.close()}
               >
                 <span className="opacity-0 mac-icon text-[8px] text-[#450000]">✕</span>
               </button>
-              <button 
+              <button
                 className="w-3.5 h-3.5 rounded-full bg-[#febc2e] hover:bg-[#febc2e] hover:brightness-110 active:brightness-90 no-drag flex items-center justify-center mac-button"
                 onClick={() => appWindow.minimize()}
               >
                 <span className="opacity-0 mac-icon text-[8px] text-[#5a4000]">−</span>
               </button>
-              <button 
+              <button
                 className="w-3.5 h-3.5 rounded-full bg-[#28c840] hover:bg-[#28c840] hover:brightness-110 active:brightness-90 no-drag flex items-center justify-center mac-button"
                 onClick={() => appWindow.toggleMaximize()}
               >
                 <span className="opacity-0 mac-icon text-[8px] text-[#004d00]">+</span>
               </button>
             </div>
-            
+
             {/* App icon and title */}
             <div className="flex items-center">
-              <img src={appIcon} alt="App Icon" className="w-9 h-9 mr-2" />
-              <span className={`${themeClasses.text} font-medium text-2xl tracking-tight antialiased`} data-tauri-drag-region>
-                {t('app.title', 'brew')}
+              <div {...containerProps} style={{ width: '36px', height: '36px', marginRight: '8px' }}>
+                <img {...frontIconProps} className={`w-9 h-9 ${frontIconProps.className}`} />
+                <img {...backIconProps} className={`w-9 h-9 ${backIconProps.className}`} />
+              </div>
+              <span className="font-medium text-2xl tracking-tight antialiased apple-intelligence-text" data-tauri-drag-region>
+                {t('app.title', 'Intelligence')}
               </span>
             </div>
           </>
         ) : (
           <>
             {/* Custom style with logo on left */}
-            <span className={`${themeClasses.text} font-medium text-2xl tracking-tight ml-16 antialiased`} data-tauri-drag-region>{t('app.title', 'brew')}</span>
+            <span className="font-medium text-2xl tracking-tight ml-16 antialiased apple-intelligence-text" data-tauri-drag-region>
+              {t('app.title', 'Intelligence')}
+            </span>
           </>
         )}
       </div>
-      
+
       {/* App icon at the intersection - для custom и native стилей */}
       {selectedTitlebarStyle !== 'macos' && (
-      <div className="absolute left-[16px] top-[7px] z-30">
-        <img src={appIcon} alt="App Icon" className="w-9 h-9" />
-      </div>
+        <div className="absolute left-[16px] top-[7px] z-30">
+          <div {...containerProps} style={{ width: '36px', height: '36px' }}>
+            <img {...frontIconProps} className={`w-9 h-9 ${frontIconProps.className}`} />
+            <img {...backIconProps} className={`w-9 h-9 ${backIconProps.className}`} />
+          </div>
+        </div>
       )}
-      
+
       {/* Right side with status indicator and window controls - adjusted to avoid overlap */}
       <div className="flex items-center h-full relative top-[-4px]" data-tauri-drag-region>
         {/* Status indicator with border and rounded corners */}
@@ -78,36 +89,36 @@ const Titlebar = ({ selectedTitlebarStyle, t, themeClasses }: TitlebarProps) => 
           <span className="w-2 h-2 rounded-full bg-gray-400 mr-2" data-tauri-drag-region></span>
           <span className={`text-sm ${themeClasses.secondaryText} antialiased`} data-tauri-drag-region>{t('app.status.no_instances', 'No instances running')}</span>
         </div>
-        
+
         {/* Window controls - только для custom стиля */}
         {selectedTitlebarStyle === 'custom' && (
-        <div className="flex no-drag">
-          <button 
-            className="w-10 h-10 flex items-center justify-center hover:bg-[var(--bg-card)] active:scale-95 active:translate-y-[1px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-full mx-1 transition-all no-drag hover-effect"
-            onClick={() => appWindow.minimize()}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-          </button>
-          <button 
-            className="w-10 h-10 flex items-center justify-center hover:bg-[var(--bg-card)] active:scale-95 active:translate-y-[1px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-full mx-1 transition-all no-drag hover-effect"
-            onClick={() => appWindow.toggleMaximize()}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-            </svg>
-          </button>
-          <button 
-            className="w-10 h-10 flex items-center justify-center hover:bg-[#ff0000] active:scale-95 text-gray-400 hover:text-white rounded-full mx-1 transition-all no-drag hover-effect-close"
-            onClick={() => appWindow.close()}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
+          <div className="flex no-drag">
+            <button
+              className="w-10 h-10 flex items-center justify-center hover:bg-[var(--bg-card)] active:scale-95 active:translate-y-[1px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-full mx-1 transition-all no-drag hover-effect"
+              onClick={() => appWindow.minimize()}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
+            <button
+              className="w-10 h-10 flex items-center justify-center hover:bg-[var(--bg-card)] active:scale-95 active:translate-y-[1px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-full mx-1 transition-all no-drag hover-effect"
+              onClick={() => appWindow.toggleMaximize()}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              </svg>
+            </button>
+            <button
+              className="w-10 h-10 flex items-center justify-center hover:bg-[#ff0000] active:scale-95 text-gray-400 hover:text-white rounded-full mx-1 transition-all no-drag hover-effect-close"
+              onClick={() => appWindow.close()}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
         )}
       </div>
     </div>

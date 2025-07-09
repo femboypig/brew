@@ -1,63 +1,66 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="./vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>brew</title>
-    <script>
-      // Detect saved theme from localStorage or use system preference
-      let savedTheme = localStorage.getItem('brew-theme');
-      if (!savedTheme) {
-        // Check system preference if no saved theme
-        savedTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches 
-          ? 'dark' 
-          : 'light';
-      }
-      
-      // Apply theme variables immediately to prevent white flash
-      const root = document.documentElement;
-      root.setAttribute('data-theme', savedTheme);
-      
-      // Set initial CSS variables based on theme
-      if (savedTheme === 'dark') {
-        root.style.setProperty('--bg-primary', '#0a0a0a');
-        root.style.setProperty('--bg-secondary', '#18181b');
-        root.style.setProperty('--bg-card', '#27272a');
-        root.style.setProperty('--text-primary', '#ffffff');
-        root.style.setProperty('--text-secondary', '#a0a0a0');
-        root.style.setProperty('--border-color', '#333333');
-      } else if (savedTheme === 'oled') {
-        root.style.setProperty('--bg-primary', '#000000');
-        root.style.setProperty('--bg-secondary', '#0a0a0a');
-        root.style.setProperty('--bg-card', '#111111');
-        root.style.setProperty('--text-primary', '#ffffff');
-        root.style.setProperty('--text-secondary', '#a0a0a0');
-        root.style.setProperty('--border-color', '#222222');
-      } else {
-        // Light theme or fallback
-        root.style.setProperty('--bg-primary', '#ffffff');
-        root.style.setProperty('--bg-secondary', '#f8f8f8');
-        root.style.setProperty('--bg-card', '#f0f0f0');
-        root.style.setProperty('--text-primary', '#000000');
-        root.style.setProperty('--text-secondary', '#505050');
-        root.style.setProperty('--border-color', '#e0e0e0');
-      }
-    </script>
-    <style>
-      html, body {
-        background-color: var(--bg-primary, #0a0a0a);
-        color: var(--text-primary, #ffffff);
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        transition: background-color 0.2s ease;
-      }
-    </style>
-  </head>
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="./src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="./vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Intelligence</title>
+  <script>
+    // Detect saved theme from localStorage or use system preference
+    let savedTheme = localStorage.getItem('intelligence-theme');
+    if (!savedTheme) {
+      // Check system preference if no saved theme
+      savedTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light';
+    }
+
+    // Apply theme variables immediately to prevent white flash
+    const root = document.documentElement;
+    root.setAttribute('data-theme', savedTheme);
+
+    // Set initial CSS variables based on theme
+    if (savedTheme === 'dark') {
+      root.style.setProperty('--bg-primary', '#0a0a0a');
+      root.style.setProperty('--bg-secondary', '#18181b');
+      root.style.setProperty('--bg-card', '#27272a');
+      root.style.setProperty('--text-primary', '#ffffff');
+      root.style.setProperty('--text-secondary', '#a0a0a0');
+      root.style.setProperty('--border-color', '#333333');
+    } else if (savedTheme === 'oled') {
+      root.style.setProperty('--bg-primary', '#000000');
+      root.style.setProperty('--bg-secondary', '#0a0a0a');
+      root.style.setProperty('--bg-card', '#111111');
+      root.style.setProperty('--text-primary', '#ffffff');
+      root.style.setProperty('--text-secondary', '#a0a0a0');
+      root.style.setProperty('--border-color', '#222222');
+    } else {
+      // Light theme or fallback
+      root.style.setProperty('--bg-primary', '#ffffff');
+      root.style.setProperty('--bg-secondary', '#f8f8f8');
+      root.style.setProperty('--bg-card', '#f0f0f0');
+      root.style.setProperty('--text-primary', '#000000');
+      root.style.setProperty('--text-secondary', '#505050');
+      root.style.setProperty('--border-color', '#e0e0e0');
+    }
+  </script>
+  <style>
+    html,
+    body {
+      background-color: var(--bg-primary, #0a0a0a);
+      color: var(--text-primary, #ffffff);
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      transition: background-color 0.2s ease;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="./src/main.tsx"></script>
+</body>
+
 </html>

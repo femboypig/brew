@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Brew is a modern Minecraft launcher built with Tauri, combining Rust (backend) and React/TypeScript (frontend).
+Intelligence is a modern Minecraft launcher built with Tauri, combining Rust (backend) and React/TypeScript (frontend).
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ Brew is a modern Minecraft launcher built with Tauri, combining Rust (backend) a
 1. Clone the repository:
    ```bash
    git clone [repository-url]
-   cd brew
+   cd Intelligence
    ```
 
 2. Install dependencies:
